@@ -27,7 +27,7 @@
 #include "PlayScence.h"
 
 #define WINDOW_CLASS_NAME L"SampleWindow"
-#define MAIN_WINDOW_TITLE L"SAMPLE 05 - SCENCE MANAGER"
+#define MAIN_WINDOW_TITLE L"DEMO"
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
 #define SCREEN_WIDTH 2000
@@ -67,16 +67,13 @@ void Render()
 	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
 	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
 	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
-
+	
 	if (d3ddv->BeginScene())
 	{
 		// Clear back buffer with a color
-		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
-
+		d3ddv->ColorFill(bb, NULL, NULL);
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
-
 		CGame::GetInstance()->GetCurrentScene()->Render();
-
 		spriteHandler->End();
 		d3ddv->EndScene();
 	}
@@ -157,10 +154,9 @@ int Run()
 
 		if (dt >= tickPerFrame)
 		{
-			frameStart = now;
 
-			game->ProcessKeyboard();
-			
+			frameStart = now;
+			game->ProcessKeyboard();			
 			Update(dt);
 			Render();
 		}

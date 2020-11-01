@@ -5,17 +5,11 @@
 #define BRICK_BBOX_HEIGHT 16
 
 class CBrick : public CGameObject
-{
-
-
-	int width;
-	int height;
-	virtual void Render();
-	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);
+{	
 	public:
-		CBrick(float l, float t, float r, float b, int scene_id);
-		virtual void Render();
-		virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
+		CBrick(float l, float t);
+	virtual void Render();
+	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };
 #pragma once
 

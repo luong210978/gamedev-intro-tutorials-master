@@ -6,7 +6,7 @@
 #include "Textures.h"
 #include "Sprites.h"
 #include "Portal.h"
-
+#include "Map.h"
 using namespace std;
 
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
@@ -26,16 +26,16 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATIONS 4
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
-
+#define SCENE_SECTION_MAP 7
 #define OBJECT_TYPE_MARIO	0
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_GOOMBA	2
 #define OBJECT_TYPE_KOOPAS	3
 
 #define OBJECT_TYPE_PORTAL	50
-
 #define MAX_SCENE_LINE 1024
 
+Map* map=NULL;
 
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
@@ -126,20 +126,17 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 {
 	vector<string> tokens = split(line);
 
-	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
-
 	if (tokens.size() < 3) return; // skip invalid lines - an object set must have at least id, x, y
 
 	int object_type = atoi(tokens[0].c_str());
-	float x = atof(tokens[1].c_str());
-	float y = atof(tokens[2].c_str());
+	float x = atof(tokens[1].c_str())*16;
+	float y = atof(tokens[2].c_str())*16;
 
 	int ani_set_id = atoi(tokens[3].c_str());
 
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
 	CGameObject *obj = NULL;
-
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
@@ -156,9 +153,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
 	case OBJECT_TYPE_BRICK: 
 	{
-		float r = atof(tokens[4].c_str());
-		float b = atof(tokens[5].c_str());
-		obj = new CBrick(x, y, r, b);
+		obj = new CBrick(x, y);
 	}
 	break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
@@ -170,20 +165,33 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			obj = new CPortal(x, y, r, b, scene_id);
 		}
 		break;
+	
+	
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
 	}
-
 	// General object setup
 	obj->SetPosition(x, y);
-
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
-
 	obj->SetAnimationSet(ani_set);
 	objects.push_back(obj);
 }
-
+void CPlayScene::_ParseSeciton_MAP(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 6) return;
+	float x = atof(tokens[0].c_str());
+	float y = atof(tokens[1].c_str());
+	float z = atof(tokens[2].c_str());
+	float t = atof(tokens[3].c_str());
+	float k = atof(tokens[4].c_str());
+	float j = atof(tokens[5].c_str());
+	wstring mt = ToWSTR(tokens[6].c_str());
+	map = new Map(x, y, z, t, k, j);
+	map->LoadMatrix(mt.c_str());
+	map->CreateTilesFromTileSet();
+}
 void CPlayScene::Load()
 {
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
@@ -210,8 +218,12 @@ void CPlayScene::Load()
 			section = SCENE_SECTION_ANIMATION_SETS; continue; }
 		if (line == "[OBJECTS]") { 
 			section = SCENE_SECTION_OBJECTS; continue; }
+		if (line == "[MAP]")
+		{
+			section = SCENE_SECTION_MAP; continue;
+		}
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
-
+		
 		//
 		// data section
 		//
@@ -222,6 +234,7 @@ void CPlayScene::Load()
 			case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
+			case SCENE_SECTION_MAP:_ParseSeciton_MAP(line); break;
 		}
 	}
 
@@ -264,6 +277,7 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
+	map->Render();
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
 }
