@@ -3,7 +3,7 @@
 0	textures\actor.png	0	136	255
 20	textures\level1-side.png	255	255	255
 30	textures\enemies-2.png	0	128	128
-40	textures\level1-side_bank.png	0	0	0
+40	textures\level1-side_bank.png	255	255	255
 # id	left	top	right	bottom	texture_id
 [SPRITES]
 # BIG MARIO 

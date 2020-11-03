@@ -284,7 +284,11 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-	map->Render();
+	float cx, cy;
+	player->GetPosition(cx, cy);
+
+
+	map->Render(round(cx),round(cy));
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
 }

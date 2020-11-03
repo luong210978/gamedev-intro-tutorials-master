@@ -44,16 +44,44 @@ void Map::LoadMatrix(LPCWSTR path)
 	}
 	file.close();
 }
-void Map::Render()
+void Map::Render(int x,int y)
 {
+	x = x / 16;
+	y = y / 16;
 	
-	for (int iRow = 0; iRow < TotalRowsOfMap; iRow++)
+
+	/*for (int iRow = 0; iRow < TotalRowsOfMap; iRow++)
 	{
 		for (int iColumn = 0; iColumn < TotalColsOfMap; iColumn++)
 		{
 			this->Tiles[this->Matrix[iRow][iColumn] - 1]->Draw(iColumn * TILE_WIDTH, iRow * TILE_HEIGHT,255);
 		}
-	}
+	}*/
+	if (x - 16 < 0)
+		x = 16;
+	if (y - 16 < 0)
+		y = 16;
+	
+		for (int iRow = y - 16; iRow < y + 16; iRow++)
+		{
+			
+			for (int iColumn = x - 16; iColumn < x + 16; iColumn++)
+			{
+				try
+				{
+					this->Tiles[this->Matrix[iRow][iColumn] - 1]->Draw(iColumn * TILE_WIDTH, iRow * TILE_HEIGHT, 255);
+				}
+				catch (const std::exception&)
+				{
+				}
+				if (iColumn == TotalColsOfMap-1)	break;
+			}
+			
+			if (iRow == TotalRowsOfMap-1) break;
+		}
+	
+	
+ 	
 }
 int Map::GetMapHeiht()
 {
