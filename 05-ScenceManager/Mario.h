@@ -29,17 +29,18 @@
 #define	MARIO_LEVEL_SMALL	1
 #define	MARIO_LEVEL_BIG		2
 
-#define MARIO_BIG_BBOX_WIDTH  24
-#define MARIO_BIG_BBOX_HEIGHT 31
+#define MARIO_BIG_BBOX_WIDTH  8
+#define MARIO_BIG_BBOX_HEIGHT 16
 
-#define MARIO_SMALL_BBOX_WIDTH  13
-#define MARIO_SMALL_BBOX_HEIGHT 15
+#define MARIO_SMALL_BBOX_WIDTH  26
+#define MARIO_SMALL_BBOX_HEIGHT 18
 
 #define MARIO_UNTOUCHABLE_TIME 5000
 
 
 class CMario : public CGameObject
 {
+	bool isjump;
 	int level;
 	int untouchable;
 	DWORD untouchable_start;
@@ -50,9 +51,11 @@ public:
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
 	virtual void Render();
-
+	bool getjump();
+	void setjump(bool isjump);
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
+	void ChangeState();
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 
 	void Reset();

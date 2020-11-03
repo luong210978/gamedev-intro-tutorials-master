@@ -7,6 +7,7 @@
 #include "Sprites.h"
 #include "Portal.h"
 #include "Map.h"
+
 using namespace std;
 
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
@@ -29,6 +30,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_MAP 7
 #define OBJECT_TYPE_MARIO	0
 #define OBJECT_TYPE_BRICK	1
+#define OBJECT_TYPE_BRICKFIRE	11
 #define OBJECT_TYPE_GOOMBA	2
 #define OBJECT_TYPE_KOOPAS	3
 
@@ -156,6 +158,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CBrick(x, y);
 	}
 	break;
+	case OBJECT_TYPE_BRICKFIRE:
+	{
+		obj = new CBrickfire(x, y);
+	}
+	break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_PORTAL:
 		{	
@@ -270,9 +277,9 @@ void CPlayScene::Update(DWORD dt)
 
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
-	cy -= game->GetScreenHeight() / 2;
+	cy -=game->GetScreenHeight() / 2;
 
-	CGame::GetInstance()->SetCamPos(cx,cy);
+	CGame::GetInstance()->SetCamPos(round(cx), round(cy));
 }
 
 void CPlayScene::Render()
@@ -304,11 +311,16 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
+		if (mario->getjump())
 		mario->SetState(MARIO_STATE_JUMP);
+		mario->setjump(0);
 		break;
 	case DIK_A: 
 		mario->Reset();
 		break;
+	case DIK_X:
+		mario->ChangeState();
+			break;
 	}
 }
 

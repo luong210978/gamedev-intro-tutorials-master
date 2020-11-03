@@ -13,7 +13,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	level = MARIO_LEVEL_BIG;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
-
+	isjump = false;
 	start_x = x; 
 	start_y = y; 
 	this->x = x; 
@@ -66,9 +66,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// block every object first!
 		x += min_tx*dx + nx*0.4f;
 		y += min_ty*dy + ny*0.4f;
-
-		if (nx!=0) vx = 0;
-		if (ny!=0) vy = 0;
+		if (nx != 0) {
+			vx = 0;
+			
+		}
+		if (ny!=0){ vy = 0; this->setjump(1);
+		}
+		else this->setjump(0);
 
 
 		//
@@ -156,7 +160,14 @@ void CMario::Render()
 
 	RenderBoundingBox();
 }
-
+bool CMario::getjump()
+{
+	return this->isjump;
+}
+void CMario::setjump(bool isjump)
+{
+	 this->isjump=isjump;
+}
 void CMario::SetState(int state)
 {
 	CGameObject::SetState(state);
@@ -210,5 +221,22 @@ void CMario::Reset()
 	SetLevel(MARIO_LEVEL_BIG);
 	SetPosition(start_x, start_y);
 	SetSpeed(0, 0);
+}
+void CMario::ChangeState()
+{
+	switch (level)
+	{
+	case 1:
+
+		SetLevel(MARIO_LEVEL_BIG);
+
+		break;
+
+	case 2:
+		
+		SetLevel(MARIO_LEVEL_SMALL);
+		SetPosition(this->x, this->y - 3);
+		break;
+	}
 }
 
