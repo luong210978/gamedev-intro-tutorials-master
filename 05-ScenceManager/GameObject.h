@@ -47,6 +47,7 @@ public:
 
 	float x; 
 	float y;
+	int type;
 
 	float dx;	// dx = vx*dt
 	float dy;	// dy = vy*dt

@@ -66,13 +66,16 @@ void Render()
 	LPDIRECT3DDEVICE9 d3ddv = game->GetDirect3DDevice();
 	LPDIRECT3DSURFACE9 bb = game->GetBackBuffer();
 	LPD3DXSPRITE spriteHandler = game->GetSpriteHandler();
-	
+
 	if (d3ddv->BeginScene())
 	{
 		// Clear back buffer with a color
-		d3ddv->ColorFill(bb, NULL, NULL);
+		d3ddv->ColorFill(bb, NULL, BACKGROUND_COLOR);
+
 		spriteHandler->Begin(D3DXSPRITE_ALPHABLEND);
+
 		CGame::GetInstance()->GetCurrentScene()->Render();
+
 		spriteHandler->End();
 		d3ddv->EndScene();
 	}

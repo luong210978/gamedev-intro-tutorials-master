@@ -37,11 +37,12 @@
 
 #define MARIO_UNTOUCHABLE_TIME 5000
 
-
+#define MARIO_HP = 100;
 class CMario : public CGameObject
 {
 	bool isjump;
 	int level;
+	float hp;
 	int untouchable;
 	DWORD untouchable_start;
 

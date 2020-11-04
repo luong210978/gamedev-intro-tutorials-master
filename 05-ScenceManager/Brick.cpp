@@ -1,14 +1,23 @@
 #include "Brick.h"
 #include "Sprites.h"
-CBrick::CBrick(float l, float t)
+CBrick::CBrick(float l, float t,int k)
 {
 	x = l;
 	y = t;
+	type = k;
 }
 void CBrick::Render()
 {
 	//animation_set->at(0)->Render(x, y);
 	
+}
+
+float CBrick::Getlosehp(int type)
+{
+	
+	
+	if (type == 11)
+		return IGNITE;
 }
 
 void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)

@@ -4,7 +4,7 @@
 
 #include "Mario.h"
 #include "Game.h"
-
+#include "Brick.h"
 #include "Goomba.h"
 #include "Portal.h"
 
@@ -18,6 +18,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	start_y = y; 
 	this->x = x; 
 	this->y = y; 
+	hp = 100;
 }
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
@@ -70,11 +71,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			vx = 0;
 			
 		}
-		if (ny!=0){ vy = 0; this->setjump(1);
-		}
+		if (ny != 0) { vy = 0; this->setjump(1); }
+		
 		else this->setjump(0);
-
-
+	
+		
 		//
 		// Collision logic with other objects
 		//
@@ -117,6 +118,14 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CPortal *p = dynamic_cast<CPortal *>(e->obj);
 				CGame::GetInstance()->SwitchScene(p->GetSceneId());
 			}
+			else if (dynamic_cast<CBrick*>(e->obj))
+			{
+				CBrick* p = dynamic_cast<CBrick*>(e->obj);
+				if (p->type == 11)
+					this->hp -= p->Getlosehp(p->type);
+				if (this->hp < 0)
+					this->SetState(MARIO_STATE_DIE);
+			}							
 		}
 	}
 
@@ -221,6 +230,8 @@ void CMario::Reset()
 	SetLevel(MARIO_LEVEL_BIG);
 	SetPosition(start_x, start_y);
 	SetSpeed(0, 0);
+	this->hp = 100;
+	
 }
 void CMario::ChangeState()
 {
