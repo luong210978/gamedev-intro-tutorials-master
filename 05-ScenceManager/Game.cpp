@@ -395,5 +395,5 @@ void CGame::SwitchScene(int scene_id, int scene_place)
 	current_scene = scene_id;
 	LPSCENE s = scenes[scene_id];
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
-	s->Load();
+	s->Load(current_place);
 }

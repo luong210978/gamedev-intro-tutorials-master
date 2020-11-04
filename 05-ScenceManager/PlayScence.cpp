@@ -210,10 +210,10 @@ void CPlayScene::_ParseSeciton_MAP(string line)
 	map->LoadMatrix(mt.c_str());
 	map->CreateTilesFromTileSet();
 }
-void CPlayScene::Load()
+void CPlayScene::Load(int crp)
 {
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
-
+	current_place = crp;
 	ifstream f;
 	f.open(sceneFilePath);
 
