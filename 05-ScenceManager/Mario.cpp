@@ -116,7 +116,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			else if (dynamic_cast<CPortal *>(e->obj))
 			{
 				CPortal *p = dynamic_cast<CPortal *>(e->obj);
-				CGame::GetInstance()->SwitchScene(p->GetSceneId());
+				CGame::GetInstance()->SwitchScene(p->GetSceneId(),p->GetScenePlace());
 			}
 			else if (dynamic_cast<CBrick*>(e->obj))
 			{
@@ -197,9 +197,12 @@ void CMario::SetState(int state)
 		break; 
 	case MARIO_STATE_IDLE: 
 		vx = 0;
+		
 		break;
 	case MARIO_STATE_DIE:
-		vy = -MARIO_DIE_DEFLECT_SPEED;
+		vy = 0;
+		//vy = -MARIO_DIE_DEFLECT_SPEED;
+		vy = 0;
 		break;
 	}
 }

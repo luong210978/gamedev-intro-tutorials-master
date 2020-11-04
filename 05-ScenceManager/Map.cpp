@@ -64,7 +64,7 @@ void Map::Render(int x,int y)
 	
 		for (int iRow = y - 16; iRow < y + 16; iRow++)
 		{
-			
+			if (iRow >= TotalRowsOfMap - 1) break;
 			for (int iColumn = x - 16; iColumn < x + 16; iColumn++)
 			{
 				try
@@ -74,10 +74,10 @@ void Map::Render(int x,int y)
 				catch (const std::exception&)
 				{
 				}
-				if (iColumn == TotalColsOfMap-1)	break;
+				if (iColumn >= TotalColsOfMap-1)	break;
 			}
 			
-			if (iRow == TotalRowsOfMap-1) break;
+			
 		}
 	
 	

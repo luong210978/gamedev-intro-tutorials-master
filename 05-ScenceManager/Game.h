@@ -43,10 +43,10 @@ class CGame
 
 	unordered_map<int, LPSCENE> scenes;
 	int current_scene; 
-
+	int current_place;
 	void _ParseSection_SETTINGS(string line);
 	void _ParseSection_SCENES(string line);
-
+	
 public:
 	void InitKeyboard();
 	void SetKeyHandler(LPKEYEVENTHANDLER handler) { keyHandler = handler; }
@@ -58,7 +58,7 @@ public:
 
 	void Load(LPCWSTR gameFile);
 	LPSCENE GetCurrentScene() { return scenes[current_scene]; }
-	void SwitchScene(int scene_id);
+	void SwitchScene(int scene_id,int scene_place);
 
 	int GetScreenWidth() { return screen_width; }
 	int GetScreenHeight() { return screen_height; }

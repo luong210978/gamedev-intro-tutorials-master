@@ -11,7 +11,7 @@
 using namespace std;
 
 CPlayScene::CPlayScene(int id, LPCWSTR filePath):
-	CScene(id, filePath)
+	CScene(id,filePath)
 {
 	key_handler = new CPlayScenceKeyHandler(this);
 }
@@ -38,7 +38,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define MAX_SCENE_LINE 1024
 
 Map* map=NULL;
-
+int current_place;
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
 	vector<string> tokens = split(line);
@@ -147,8 +147,15 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(x,y); 
-		player = (CMario*)obj;  
+		if (atof(tokens[4].c_str()) == current_place)
+		{
+			obj = new CMario(x, y);
+			player = (CMario*)obj;
+		}
+		else
+		{
+			return;
+		}
 		
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
@@ -169,8 +176,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		{	
 			float r = atof(tokens[4].c_str());
 			float b = atof(tokens[5].c_str());
+		
 			int scene_id = atoi(tokens[6].c_str());
-			obj = new CPortal(x, y, r, b, scene_id);
+			int scene_place = atoi(tokens[7].c_str());
+			obj = new CPortal(x, y, r*16, b*16, scene_id, scene_place);
+			//player = new CMario(nx, ny);
 		}
 		break;
 	
@@ -244,6 +254,7 @@ void CPlayScene::Load()
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 			case SCENE_SECTION_MAP:_ParseSeciton_MAP(line); break;
 		}
+		
 	}
 
 	f.close();
@@ -275,11 +286,10 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
 	CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -=game->GetScreenHeight() / 2;
-
+	
 	CGame::GetInstance()->SetCamPos(round(cx), round(cy));
 }
 
@@ -333,9 +343,9 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-
 	// disable control key when Mario die 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
+	if (mario->GetState() == MARIO_STATE_DIE) 
+		return;
 	if (game->IsKeyDown(DIK_RIGHT))
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))

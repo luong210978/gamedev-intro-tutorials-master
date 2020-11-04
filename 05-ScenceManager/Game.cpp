@@ -325,11 +325,13 @@ void CGame::_ParseSection_SETTINGS(string line)
 
 	if (tokens.size() < 2) return;
 	if (tokens[0] == "start")
+	{
 		current_scene = atoi(tokens[1].c_str());
+		current_place = atoi(tokens[2].c_str());
+	}
 	else
 		DebugOut(L"[ERROR] Unknown game setting %s\n", ToWSTR(tokens[0]).c_str());
 }
-
 void CGame::_ParseSection_SCENES(string line)
 {
 	vector<string> tokens = split(line);
@@ -341,7 +343,6 @@ void CGame::_ParseSection_SCENES(string line)
 	LPSCENE scene = new CPlayScene(id, path);
 	scenes[id] = scene;
 }
-
 /*
 	Load game campaign file and load/initiate first scene
 */
@@ -378,10 +379,10 @@ void CGame::Load(LPCWSTR gameFile)
 
 	DebugOut(L"[INFO] Loading game file : %s has been loaded successfully\n",gameFile);
 
-	SwitchScene(current_scene);
+	SwitchScene(current_scene, current_place);
 }
 
-void CGame::SwitchScene(int scene_id)
+void CGame::SwitchScene(int scene_id, int scene_place)
 {
 	DebugOut(L"[INFO] Switching to scene %d\n", scene_id);
 
@@ -390,9 +391,9 @@ void CGame::SwitchScene(int scene_id)
 	CTextures::GetInstance()->Clear();
 	CSprites::GetInstance()->Clear();
 	CAnimations::GetInstance()->Clear();
-
+	current_place = scene_place;
 	current_scene = scene_id;
 	LPSCENE s = scenes[scene_id];
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
-	s->Load();	
+	s->Load();
 }
