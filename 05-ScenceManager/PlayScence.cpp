@@ -30,6 +30,8 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_HERO	0
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_BRICKFIRE	11
+#define OBJECT_TYPE_thang	12
+
 #define OBJECT_TYPE_GOOMBA	2
 #define OBJECT_TYPE_KOOPAS	3
 
@@ -168,6 +170,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		obj = new CBrick(x, y, object_type);
 	}
+	case OBJECT_TYPE_thang:
+	{
+		obj = new CBrick(x, y, object_type);
+	}
+
 	break;
 	break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
@@ -296,8 +303,6 @@ void CPlayScene::Render()
 {
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
-
 	map->Render(round(cx),round(cy));
 	for (int i = 0; i < objects.size(); i++)
 		objects[i]->Render();
@@ -329,14 +334,16 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		HERO->SetState(HERO_STATE_JUMP);
 		HERO->setjump(0);
 		break;
-	/*case DIK_DOWN:
-		if (HERO->state == HERO_LEVEL_ONLYMAN)
-			dy = vy;*/
+	case DIK_DOWN:
+		if (HERO->isdown==1)
+			if(HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
+				HERO->SetState(HERO_STATE_DOWN);
+		break;
 	case DIK_A: 
 		HERO->Reset();
 		break;
 	case DIK_X:
-		HERO->ChangeState();
+		HERO->Changelevel();
 			break;
 	}
 }
@@ -348,6 +355,8 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when HERO ONLYMANDIE 
 	if (HERO->GetState() == HERO_STATE_ONLYMANDIE) 
 		return;
+	/*if ((game->IsKeyDown(DIK_DOWN)))
+		return;*/
 	if (game->IsKeyDown(DIK_RIGHT))
 		HERO->SetState(HERO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))

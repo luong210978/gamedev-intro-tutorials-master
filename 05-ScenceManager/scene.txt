@@ -5,7 +5,7 @@
 40	textures\level1-side_bank.png	255	255	255
 # id	left	top	right	bottom	texture_id
 [SPRITES]
-# BIG MARIO 
+# ONLYMAN HERO
 # idle right
 10001	435	49	443	65	0
 # walk
@@ -20,8 +20,11 @@
 10014	209	49	217	64	0
 # die 
 10099	325	133	341	141	0
-# SMALL MARIO
-# idle small right
+#down right->left
+10005	368	49	378	65	0
+10006	394	49	404	65	0
+# incar HERO
+# idle incar HERO
 10021	0	8	26	26	0
 # walk
 10022	40	8	66	26	0
@@ -51,12 +54,12 @@
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
 
-# ==== MARIO =========
-#idle BIG right
+# ==== HERO=========
+#idle ONLYMAN right
 400	10001	100
-#idle BIG left
+#idle ONLYMAN left
 401	10011	100
-#idle small right
+#idle incar HERO
 402	10021	100
 #idle small left
 403	10031	100
@@ -70,6 +73,8 @@
 503	10032	100	10033	100	10034	100	10031	100
 #die
 599	10099	100
+#onlyman down
+404	10005	100	10006	100
 # ==== BRICK =========
 601	20001	100
 # ==== GOOMBA  =========
@@ -88,7 +93,7 @@
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599
+1	400	401	402	403	500	501	502	503	599	404
 # BRICK 
 21	601	100
 # QUESTION MARK BRICK 
@@ -555,6 +560,22 @@
 11	119	61	21
 11	120	61	21
 11	121	61	21
+12	27	76	21
+12	27	77	21
+12	27	78	21
+12	27	79	21
+12	27	80	21
+12	27	81	21
+12	27	82	21
+12	27	83	21
+12	27	84	21
+12	27	85	21
+12	27	86	21
+12	27	87	21
+12	27	88	21
+12	27	89	21
+
+
 
 # --- SCENE PORTAL ----	
 # type	l	t	ani_set_id	r	b	scene_id	scceneplace

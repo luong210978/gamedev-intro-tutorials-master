@@ -20,7 +20,7 @@
 #include "GameObject.h"
 #include "Textures.h"
 
-#include "Mario.h"
+#include "HERO.h"
 #include "Brick.h"
 #include "Goomba.h"
 
@@ -30,8 +30,8 @@
 #define MAIN_WINDOW_TITLE L"DEMO"
 
 #define BACKGROUND_COLOR D3DCOLOR_XRGB(255, 255, 200)
-#define SCREEN_WIDTH 2000
-#define SCREEN_HEIGHT 2000
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 200
 #define MAX_FRAME_RATE 120
 
 CGame *game;

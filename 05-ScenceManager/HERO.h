@@ -7,13 +7,15 @@
 #define HERO_JUMP_SPEED_Y	0.5f
 #define HERO_JUMP_DEFLECT_SPEED	0.2f
 #define HERO_GRAVITY			0.002f
+#define HERO_GRAVITYdithang			0.0002f
 #define HERO_ONLYMANDIE_DEFLECT_SPEED	 0.5f
 
 #define HERO_STATE_IDLE			0
 #define HERO_STATE_WALKING_RIGHT	100
 #define HERO_STATE_WALKING_LEFT	200
-#define HERO_STATE_JUMP			300
-#define HERO_STATE_ONLYMANDIE				400
+#define HERO_STATE_JUMP	300
+#define HERO_STATE_ONLYMANDIE	400
+#define HERO_STATE_DOWN	500
 
 #define HERO_ANI_ONLYMAN_IDLE_RIGHT	0
 #define HERO_ANI_ONLYMAN_IDLE_LEFT		1
@@ -26,6 +28,8 @@
 #define HERO_ANI_INCAR_WALKING_LEFT	7
 
 #define HERO_ANI_ONLYMANDIE				8
+
+#define HERO_ANI_DOWN	9
 
 #define	HERO_LEVEL_INCAR	1
 #define	HERO_LEVEL_ONLYMAN	2
@@ -44,6 +48,7 @@ class CHERO : public CGameObject
 	bool isjump;
 	int level;
 	float hp;
+	
 	int untouchable;
 	DWORD untouchable_start;
 
@@ -57,7 +62,11 @@ public:
 	void setjump(bool isjump);
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
-	void ChangeState();
+	int GetLevel()
+	{
+		return level;
+	}
+	void Changelevel();
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount(); }
 
 	void Reset();

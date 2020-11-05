@@ -123,6 +123,21 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				CBrick* p = dynamic_cast<CBrick*>(e->obj);
 				if (p->type == 11)
 					this->hp -= p->Getlosehp(p->type);
+				if (p->type == 12)
+				{
+					CGame* game = CGame::GetInstance();
+					this->isdown = 1; if ((game->IsKeyDown(DIK_DOWN)))
+						this->SetPosition(p->x + 3, p->y);
+					this->isdown = 1; if ((game->IsKeyDown(DIK_UP)))
+						this->SetPosition(p->x + 3, p->y-36);
+					this->SetState(HERO_STATE_DOWN);
+					//this-> vx = 1;
+					//animation_set->at(HERO_STATE_DOWN)->Render(Ge, y, 255);
+
+					//RenderBoundingBox();
+				}
+				else this->isdown == 0;
+				
 				if (this->hp < 0)
 					this->SetState(HERO_STATE_ONLYMANDIE);
 			}							
@@ -139,29 +154,36 @@ void CHERO::Render()
 	if (state == HERO_STATE_ONLYMANDIE)
 		ani = HERO_ANI_ONLYMANDIE;
 	else
-	if (level == HERO_LEVEL_ONLYMAN)
 	{
-		if (vx == 0)
+		if (state == HERO_STATE_DOWN)
 		{
-			if (nx>0) ani = HERO_ANI_ONLYMAN_IDLE_RIGHT;
-			else ani = HERO_ANI_ONLYMAN_IDLE_LEFT;
+ 			ani = HERO_ANI_DOWN;
 		}
-		else if (vx > 0) 
-			ani = HERO_ANI_ONLYMAN_WALKING_RIGHT; 
-		else ani = HERO_ANI_ONLYMAN_WALKING_LEFT;
-	}
-	else if (level == HERO_LEVEL_INCAR)
-	{
-		if (vx == 0)
-		{
-			if (nx>0) ani = HERO_ANI_INCAR_IDLE_RIGHT;
-			else ani = HERO_ANI_INCAR_IDLE_LEFT;
-		}
-		else if (vx > 0)
-			ani = HERO_ANI_INCAR_WALKING_RIGHT;
-		else ani = HERO_ANI_INCAR_WALKING_LEFT;
-	}
+		else
+			if (level == HERO_LEVEL_ONLYMAN)
+			{
+				if (vx == 0)
+				{
+					if (nx > 0) ani = HERO_ANI_ONLYMAN_IDLE_RIGHT;
+					else ani = HERO_ANI_ONLYMAN_IDLE_LEFT;
+				}
+				else if (vx > 0)
+					ani = HERO_ANI_ONLYMAN_WALKING_RIGHT;
+				else ani = HERO_ANI_ONLYMAN_WALKING_LEFT;
 
+			}
+			else if (level == HERO_LEVEL_INCAR)
+			{
+				if (vx == 0)
+				{
+					if (nx > 0) ani = HERO_ANI_INCAR_IDLE_RIGHT;
+					else ani = HERO_ANI_INCAR_IDLE_LEFT;
+				}
+				else if (vx > 0)
+					ani = HERO_ANI_INCAR_WALKING_RIGHT;
+				else ani = HERO_ANI_INCAR_WALKING_LEFT;
+			}
+	}
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 
@@ -183,6 +205,9 @@ void CHERO::SetState(int state)
 
 	switch (state)
 	{
+	case HERO_STATE_DOWN:
+		vy = 0;
+		break;
 	case HERO_STATE_WALKING_RIGHT:
 		vx = HERO_WALKING_SPEED;
 		nx = 1;
@@ -202,8 +227,8 @@ void CHERO::SetState(int state)
 	case HERO_STATE_ONLYMANDIE:
 		vy = 0;
 		//vy = -HERO_ONLYMANDIE_DEFLECT_SPEED;
-		vy = 0;
 		break;
+	
 	}
 }
 
@@ -236,7 +261,7 @@ void CHERO::Reset()
 	this->hp = 100;
 	
 }
-void CHERO::ChangeState()
+void CHERO::Changelevel()
 {
 	switch (level)
 	{

@@ -58,7 +58,7 @@ public:
 	int nx;	 
 
 	int state;
-
+	bool isdown;
 	DWORD dt; 
 
 	LPANIMATION_SET animation_set;
