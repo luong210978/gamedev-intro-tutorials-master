@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-
 #include "PlayScence.h"
 #include "Utils.h"
 #include "Textures.h"
@@ -28,7 +27,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS	6
 #define SCENE_SECTION_MAP 7
-#define OBJECT_TYPE_MARIO	0
+#define OBJECT_TYPE_HERO	0
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_BRICKFIRE	11
 #define OBJECT_TYPE_GOOMBA	2
@@ -141,16 +140,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	CGameObject *obj = NULL;
 	switch (object_type)
 	{
-	case OBJECT_TYPE_MARIO:
+	case OBJECT_TYPE_HERO:
 		if (player!=NULL) 
 		{
-			DebugOut(L"[ERROR] MARIO object was created before!\n");
+			DebugOut(L"[ERROR] HERO object was created before!\n");
 			return;
 		}
 		if (atof(tokens[4].c_str()) == current_place)
 		{
-			obj = new CMario(x, y);
-			player = (CMario*)obj;
+			obj = new CHERO(x, y);
+			player = (CHERO*)obj;
 		}
 		else
 		{
@@ -180,7 +179,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			int scene_id = atoi(tokens[6].c_str());
 			int scene_place = atoi(tokens[7].c_str());
 			obj = new CPortal(x, y, r*16, b*16, scene_id, scene_place);
-			//player = new CMario(nx, ny);
+			//player = new CHERO(nx, ny);
 		}
 		break;
 	
@@ -266,7 +265,7 @@ void CPlayScene::Load(int crp)
 
 void CPlayScene::Update(DWORD dt)
 {
-	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
+	// We know that HERO is the first object in the list hence we won't add him into the colliable object list
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
@@ -280,10 +279,10 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
+	// skip the rest if scene was already unloaded (HERO::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
 
-	// Update camera to follow mario
+	// Update camera to follow HERO
 	float cx, cy;
 	player->GetPosition(cx, cy);
 	CGame *game = CGame::GetInstance();
@@ -322,19 +321,22 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
 
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
-		if (mario->getjump())
-		mario->SetState(MARIO_STATE_JUMP);
-		mario->setjump(0);
+		if (HERO->getjump())
+		HERO->SetState(HERO_STATE_JUMP);
+		HERO->setjump(0);
 		break;
+	/*case DIK_DOWN:
+		if (HERO->state == HERO_LEVEL_ONLYMAN)
+			dy = vy;*/
 	case DIK_A: 
-		mario->Reset();
+		HERO->Reset();
 		break;
 	case DIK_X:
-		mario->ChangeState();
+		HERO->ChangeState();
 			break;
 	}
 }
@@ -342,14 +344,14 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-	// disable control key when Mario die 
-	if (mario->GetState() == MARIO_STATE_DIE) 
+	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
+	// disable control key when HERO ONLYMANDIE 
+	if (HERO->GetState() == HERO_STATE_ONLYMANDIE) 
 		return;
 	if (game->IsKeyDown(DIK_RIGHT))
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
+		HERO->SetState(HERO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		HERO->SetState(HERO_STATE_WALKING_LEFT);
 	else
-		mario->SetState(MARIO_STATE_IDLE);
+		HERO->SetState(HERO_STATE_IDLE);
 }
