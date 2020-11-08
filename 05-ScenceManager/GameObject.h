@@ -21,7 +21,6 @@ struct CCollisionEvent
 {
 	LPGAMEOBJECT obj;
 	float t, nx, ny;
-	
 	float dx, dy;		// *RELATIVE* movement distance between this object and obj
 
 	CCollisionEvent(float t, float nx, float ny, float dx = 0, float dy = 0, LPGAMEOBJECT obj = NULL) 
@@ -48,6 +47,7 @@ public:
 	float x; 
 	float y;
 	int type;
+	bool isban=false;
 
 	float dx;	// dx = vx*dt
 	float dy;	// dy = vy*dt
@@ -58,8 +58,11 @@ public:
 	int nx;	 
 
 	int state;
-	bool isdown;
+
+	bool visible;
+
 	DWORD dt; 
+	vector<LPANIMATION> animations;
 
 	LPANIMATION_SET animation_set;
 

@@ -23,7 +23,7 @@ protected:
 	
 public: 
 	CPlayScene(int id, LPCWSTR filePath);
-	virtual void Load(int crp);
+	virtual void Load(int crp, int lv);
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
@@ -35,6 +35,8 @@ public:
 
 class CPlayScenceKeyHandler : public CScenceKeyHandler
 {
+protected:
+	vector<LPGAMEOBJECT> objects2;
 public: 
 	virtual void KeyState(BYTE *states);
 	virtual void OnKeyDown(int KeyCode);

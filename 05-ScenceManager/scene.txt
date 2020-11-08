@@ -3,6 +3,8 @@
 0	textures\actor.png	0	136	255
 20	textures\level1-side.png	255	255	255
 40	textures\level1-side_bank.png	255	255	255
+50	textures\t1.png	0	57	115
+60	textures\nhanvat.png	61	70	205
 # id	left	top	right	bottom	texture_id
 [SPRITES]
 # ONLYMAN HERO
@@ -23,6 +25,13 @@
 #down right->left
 10005	368	49	378	65	0
 10006	394	49	404	65	0
+#down bò left
+10007	245	93	260	101	0
+10008	205	93	220	101	0
+#DOWN BÒ RIGHT
+10009	512	93	527	101	0
+10010	552	93	567	101	0
+
 # incar HERO
 # idle incar HERO
 10021	0	8	26	26	0
@@ -36,6 +45,8 @@
 10032	706	8	732	26	0
 10033	666	8	692	26	0
 10034	626	8	652	26	0
+#bullet
+50000	82	38	90	46	50	
 #BRICK
 20001	0	0	16	16	20
 #GOOMBA
@@ -63,9 +74,9 @@
 402	10021	100
 #idle small left
 403	10031	100
-#walk right big
+#walk right onlyman
 500	10002	100	10003	100	10004	100
-#walk left big
+#walk left onlyman
 501	10012	100	10013	100	10014	100
 #walk right small
 502	10022	100	10023	100	10024	100	10021	100
@@ -73,38 +84,47 @@
 503	10032	100	10033	100	10034	100	10031	100
 #die
 599	10099	100
+555	50000	100
 #onlyman down
-404	10005	100	10006	100
+404	10005	100
+405	10006	100
+#onlymandown bò
+406	10007	1000
+407	10008	1000
+408	10009	1000
+409	10010	1000
 # ==== BRICK =========
 601	20001	100
 # ==== GOOMBA  =========
 # walk
-701	30001	100	30002	100
+#701	30001	100	30002	100
 # die
-702	30003	100
+#702	30003	100
 
 # ==== KOOPAS  =========
 #walk left
-801	50001	100	50002	100
+#801	50001	100	50002	100
 #walk right
-802	50011	100	50012	100'
+#802	50011	100	50012	100'
 #die
-803	50031	100
+#803	50031	100
 # id	ani1	ani2	ani3
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599	404
+1	400	401	402	403	500	501	502	503	599	404	405	406	407	408	409
 # BRICK 
-21	601	100
+21	601
+#Bullet
+22	555	555
 # QUESTION MARK BRICK 
 #22	602
 # GOOMBA
-3	701	702
+#3	701	702
 #KOOPAS
-4	801	802	803
+#4	801	802	803
 [OBJECTS]
 # type	l	t	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas 21 ,11
 # MARIO	type x,y,aniset,id
 0	20	18	1	1
 0	20	67	1	2
@@ -578,9 +598,9 @@
 
 
 # --- SCENE PORTAL ----	
-# type	l	t	ani_set_id	r	b	scene_id	scceneplace
-50	124	55	0	125	57	4	2
-50	19	67	0	20	69	4	3
+# type	l	t	ani_set_id,r,b		scene_id,scceneplace,lv
+50	124	55	0	125	57	4	2	1
+50	19	67	0	20	69	4	3	1
 [MAP]
 #title	cl	row	w	h	total bit
 40	11	29	128	127	309	map\level1-side_map.txt

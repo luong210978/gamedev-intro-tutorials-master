@@ -5,6 +5,7 @@
 #include "Textures.h"
 #include "Sprites.h"
 #include "Portal.h"
+#include "Bullet.h"
 #include "Map.h"
 
 using namespace std;
@@ -31,6 +32,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_BRICKFIRE	11
 #define OBJECT_TYPE_thang	12
+#define OBJECT_TYPE_BULLET	100
 
 #define OBJECT_TYPE_GOOMBA	2
 #define OBJECT_TYPE_KOOPAS	3
@@ -40,6 +42,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 
 Map* map=NULL;
 int current_place;
+int current_level;
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
 	vector<string> tokens = split(line);
@@ -136,14 +139,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	float y = atof(tokens[2].c_str())*16;
 
 	int ani_set_id = atoi(tokens[3].c_str());
-
+	
+	CGameObject* obj = NULL;
 	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
 
-	CGameObject *obj = NULL;
 	switch (object_type)
 	{
 	case OBJECT_TYPE_HERO:
-		if (player!=NULL) 
+		if (player != NULL)
 		{
 			DebugOut(L"[ERROR] HERO object was created before!\n");
 			return;
@@ -152,16 +155,20 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		{
 			obj = new CHERO(x, y);
 			player = (CHERO*)obj;
+			player->car = new Ccar(x,y,1);			
+			LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
+			player->car->SetAnimationSet(ani_set);
+			objects.push_back(player->car);
 		}
 		else
 		{
 			return;
 		}
-		
+
 		DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
-	case OBJECT_TYPE_BRICK: 
+	case OBJECT_TYPE_BRICK:
 	{
 		obj = new CBrick(x, y, object_type);
 	}
@@ -176,25 +183,24 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 
 	break;
-	break;
-	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
-	case OBJECT_TYPE_PORTAL:
-		{	
-			float r = atof(tokens[4].c_str());
-			float b = atof(tokens[5].c_str());
-		
-			int scene_id = atoi(tokens[6].c_str());
-			int scene_place = atoi(tokens[7].c_str());
-			obj = new CPortal(x, y, r*16, b*16, scene_id, scene_place);
-			//player = new CHERO(nx, ny);
-		}
+	case OBJECT_TYPE_KOOPAS: obj = new CKoopas();
 		break;
-	
-	
+	case OBJECT_TYPE_PORTAL:
+	{
+		float r = atof(tokens[4].c_str());
+		float b = atof(tokens[5].c_str());
+
+		int scene_id = atoi(tokens[6].c_str());
+		int scene_place = atoi(tokens[7].c_str());
+		int scene_level = atoi(tokens[8].c_str());
+		obj = new CPortal(x, y, r * 16, b * 16, scene_id, scene_place,scene_level);
+	}
+	break;
 	default:
 		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
 	}
+
 	// General object setup
 	obj->SetPosition(x, y);
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
@@ -216,10 +222,11 @@ void CPlayScene::_ParseSeciton_MAP(string line)
 	map->LoadMatrix(mt.c_str());
 	map->CreateTilesFromTileSet();
 }
-void CPlayScene::Load(int crp)
+void CPlayScene::Load(int crp,int lv)
 {
 	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 	current_place = crp;
+	current_level = lv;
 	ifstream f;
 	f.open(sceneFilePath);
 
@@ -268,6 +275,7 @@ void CPlayScene::Load(int crp)
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
+	player->SetLevel(current_level);
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -276,7 +284,7 @@ void CPlayScene::Update(DWORD dt)
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
-	for (size_t i = 1; i < objects.size(); i++)
+	for (size_t i = 0; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
 	}
@@ -298,14 +306,34 @@ void CPlayScene::Update(DWORD dt)
 	
 	CGame::GetInstance()->SetCamPos(round(cx), round(cy));
 }
-
+CGameObject* obj = NULL;
 void CPlayScene::Render()
 {
 	float cx, cy;
 	player->GetPosition(cx, cy);
 	map->Render(round(cx),round(cy));
-	for (int i = 0; i < objects.size(); i++)
-		objects[i]->Render();
+	if (player->car->visible == true)
+		objects[0]->Render();
+	if (player->isban ==true)
+		if (player->nx == -1)
+		{
+			player->isban = false;
+			obj = new CBullet(cx- BULLET_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, -1);
+			objects.push_back(obj);
+		}
+		else
+		{
+			player->isban = false;
+			CGameObject* obj = NULL;
+			obj = new CBullet(cx + HERO_ONLYMAN_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, 1);
+			objects.push_back(obj);
+		
+		}
+	for (int i = 1; i < objects.size(); i++)
+		if (objects[i]->x > NULL+20)
+			objects[i]->Render();
+		
+	
 }
 
 /*
@@ -321,42 +349,56 @@ void CPlayScene::Unload()
 
 	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
-
 void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 	//DebugOut(L"[INFO] KeyDown: %d\n", KeyCode);
-
+	
 	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
+	if (KeyCode == DIK_C)
+		if (HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
+			HERO->isban = true;
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
 		if (HERO->getjump())
-		HERO->SetState(HERO_STATE_JUMP);
+			HERO->SetState(HERO_STATE_JUMP);
 		HERO->setjump(0);
 		break;
-	case DIK_DOWN:
-		if (HERO->isdown==1)
-			if(HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
-				HERO->SetState(HERO_STATE_DOWN);
-		break;
-	case DIK_A: 
+	case DIK_A:
 		HERO->Reset();
 		break;
 	case DIK_X:
-		HERO->Changelevel();
-			break;
+		if (HERO->getjump())
+		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+		{
+			HERO->car->visible = true;
+			HERO->car->SetPosition(HERO->x, HERO->y);
+			HERO->car->Setn(HERO->nx);
+			HERO->Changelevel();
+
+		}
+		else 
+			if (HERO->GetLevel()== HERO_LEVEL_ONLYMAN)
+				if (HERO->getinto == true)
+				{
+					HERO->nx = HERO->car->nx;
+					HERO->Changelevel();
+					HERO->car->visible = false;
+
+				}
+		break;
 	}
+	
 }
 
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
+
 	// disable control key when HERO ONLYMANDIE 
 	if (HERO->GetState() == HERO_STATE_ONLYMANDIE) 
 		return;
-	/*if ((game->IsKeyDown(DIK_DOWN)))
-		return;*/
 	if (game->IsKeyDown(DIK_RIGHT))
 		HERO->SetState(HERO_STATE_WALKING_RIGHT);
 	else if (game->IsKeyDown(DIK_LEFT))

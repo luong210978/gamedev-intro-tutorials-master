@@ -7,7 +7,7 @@
 #include "Brick.h"
 #include "Goomba.h"
 #include "Portal.h"
-
+#include "car.h"
 CHERO::CHERO(float x, float y) : CGameObject()
 {
 	level = HERO_LEVEL_ONLYMAN;
@@ -21,14 +21,18 @@ CHERO::CHERO(float x, float y) : CGameObject()
 	hp = 100;
 }
 
-void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
+void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	// Calculate dx, dy 
 	CGameObject::Update(dt);
-
 	// Simple fall down
-	vy += HERO_GRAVITY*dt;
-
+	vy += HERO_GRAVITY * dt;
+	float x1, y1;
+	car->GetPosition(x1, y1);
+	if ((x > CAR_BBOX_WIDTH + x1) || (y > CAR_BBOX_HEIGHT + y1) || (x < x1)||(y< y1))
+		getinto = false;
+	else
+		getinto = true;
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
@@ -56,8 +60,6 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float min_tx, min_ty, nx = 0, ny;
 		float rdx = 0; 
 		float rdy = 0;
-
-		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
 		// how to push back HERO if collides with a moving objects, what if HERO is pushed this way into another object?
@@ -65,13 +67,13 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//	x += nx*abs(rdx); 
 		
 		// block every object first!
-		x += min_tx*dx + nx*0.4f;
-		y += min_ty*dy + ny*0.4f;
+		//x += min_tx*dx + nx*0.4f;
+		//y += min_ty*dy + ny*0.4f;
 		if (nx != 0) {
 			vx = 0;
 			
 		}
-		if (ny != 0) { vy = 0; this->setjump(1); }
+		if (ny != 0) { vy = 0;}
 		
 		else this->setjump(0);
 	
@@ -82,65 +84,96 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-
-			if (dynamic_cast<CGoomba *>(e->obj)) // if e->obj is Goomba 
+			if (dynamic_cast<Ccar*>(e->obj))//xe 
 			{
-				CGoomba *goomba = dynamic_cast<CGoomba *>(e->obj);
+				this->SetSpeed(HERO_WALKING_SPEED, HERO_GRAVITY);
+				this->getinto = true;
+				x += dx;
+				y += dy - 1 * 0.4f;
+			}
+			else //anything else;
+			{
+				if (dynamic_cast<CGoomba*>(e->obj)) // if e->obj is Goomba 
+				{
+					CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
 
-				// jump on top >> kill Goomba and deflect a bit 
-				if (e->ny < 0)
-				{
-					if (goomba->GetState()!= GOOMBA_STATE_DIE)
+					// jump on top >> kill Goomba and deflect a bit 
+					if (e->ny < 0)
 					{
-						goomba->SetState(GOOMBA_STATE_DIE);
-						vy = -HERO_JUMP_DEFLECT_SPEED;
-					}
-				}
-				else if (e->nx != 0)
-				{
-					if (untouchable==0)
-					{
-						if (goomba->GetState()!=GOOMBA_STATE_DIE)
+						if (goomba->GetState() != GOOMBA_STATE_DIE)
 						{
-							if (level > HERO_LEVEL_INCAR)
-							{
-								level = HERO_LEVEL_INCAR;
-								StartUntouchable();
-							}
-							else 
-								SetState(HERO_STATE_ONLYMANDIE);
+							goomba->SetState(GOOMBA_STATE_DIE);
+							vy = -HERO_JUMP_DEFLECT_SPEED;
 						}
 					}
-				}
-			} // if Goomba
-			else if (dynamic_cast<CPortal *>(e->obj))
-			{
-				CPortal *p = dynamic_cast<CPortal *>(e->obj);
-				CGame::GetInstance()->SwitchScene(p->GetSceneId(),p->GetScenePlace());
-			}
-			else if (dynamic_cast<CBrick*>(e->obj))
-			{
-				CBrick* p = dynamic_cast<CBrick*>(e->obj);
-				if (p->type == 11)
-					this->hp -= p->Getlosehp(p->type);
-				if (p->type == 12)
+					else if (e->nx != 0)
+					{
+						if (untouchable == 0)
+						{
+							if (goomba->GetState() != GOOMBA_STATE_DIE)
+							{
+								if (level > HERO_LEVEL_INCAR)
+								{
+									level = HERO_LEVEL_INCAR;
+									StartUntouchable();
+								}
+								else
+									SetState(HERO_STATE_ONLYMANDIE);
+							}
+						}
+					}
+				} // if Goomba
+				else if (dynamic_cast<CPortal*>(e->obj))
 				{
-					CGame* game = CGame::GetInstance();
-					this->isdown = 1; if ((game->IsKeyDown(DIK_DOWN)))
-						this->SetPosition(p->x + 3, p->y);
-					this->isdown = 1; if ((game->IsKeyDown(DIK_UP)))
-						this->SetPosition(p->x + 3, p->y-36);
-					this->SetState(HERO_STATE_DOWN);
-					//this-> vx = 1;
-					//animation_set->at(HERO_STATE_DOWN)->Render(Ge, y, 255);
-
-					//RenderBoundingBox();
+					CPortal* p = dynamic_cast<CPortal*>(e->obj);
+					CGame::GetInstance()->SwitchScene(p->GetSceneId(), p->GetScenePlace(),p->GetSceneLevel());
 				}
-				else this->isdown == 0;
-				
-				if (this->hp < 0)
+				else if (dynamic_cast<CBrick*>(e->obj))
+				{
+					CBrick* p = dynamic_cast<CBrick*>(e->obj);
+					CGame* game = CGame::GetInstance();
+					if (p->type == 11)
+						this->hp -= p->Getlosehp(p->type);
+					if (p->type == 12)
+					{
+						if (level == HERO_LEVEL_ONLYMAN)
+						{
+							SetLevel(HERO_LEVEL_DICAUTHANG);
+						}
+						if (level == HERO_LEVEL_DICAUTHANG)
+						{
+							CGame* game = CGame::GetInstance();
+
+							if ((game->IsKeyDown(DIK_DOWN)))
+								this->SetPosition(p->x + 3, p->y);
+							if ((game->IsKeyDown(DIK_UP)))
+								this->SetPosition(p->x + 3, p->y - 33);
+							
+						}
+						//this->SetState(HERO_STATE_DOWN);				
+					}
+					else { if (level == HERO_LEVEL_DICAUTHANG) SetLevel(HERO_LEVEL_ONLYMAN); }
+					if (level == HERO_LEVEL_ONLYMAN)
+					{
+						if ((game->IsKeyDown(DIK_DOWN)))
+						{
+							this->SetLevel(HERO_LEVEl_BO);
+							isjump = false;
+						}	
+					}
+					if (level == HERO_LEVEl_BO)
+					{
+						if ((game->IsKeyDown(DIK_UP)))
+						{
+							this->SetLevel(HERO_LEVEL_ONLYMAN);
+							this->SetPosition(x , y - 10);
+							isjump = true;
+						}
+					}	else this->setjump(1);
+					if (this->hp < 0)
 					this->SetState(HERO_STATE_ONLYMANDIE);
-			}							
+				}
+			}
 		}
 	}
 
@@ -150,14 +183,86 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CHERO::Render()
 {
-	int ani = -1;
+	ani = -1;
 	if (state == HERO_STATE_ONLYMANDIE)
+	{
+		ani = HERO_ANI_ONLYMANDIE;
+		return;
+	}
+	switch (level)
+	{
+	
+	case HERO_LEVEL_DICAUTHANG:
+		if (bani == HERO_ANI_DOWN1)
+		{
+			ani = HERO_ANI_DOWN2;
+			bani = HERO_ANI_DOWN2;
+		}
+		else
+			ani = HERO_ANI_DOWN1;
+		break;
+	case HERO_LEVEL_ONLYMAN:
+		if (vx == 0)
+		{
+			if (nx > 0) ani = HERO_ANI_ONLYMAN_IDLE_RIGHT;
+			else ani = HERO_ANI_ONLYMAN_IDLE_LEFT;
+		}
+		else if (vx > 0)
+			ani = HERO_ANI_ONLYMAN_WALKING_RIGHT;
+		else ani = HERO_ANI_ONLYMAN_WALKING_LEFT;
+		break;
+	case HERO_LEVEL_INCAR:
+		if (vx == 0)
+		{
+			if (nx > 0) ani = HERO_ANI_INCAR_IDLE_RIGHT;
+			else ani = HERO_ANI_INCAR_IDLE_LEFT;
+		}
+		else if (vx > 0)
+			ani = HERO_ANI_INCAR_WALKING_RIGHT;
+		else ani = HERO_ANI_INCAR_WALKING_LEFT;
+		break;
+	case HERO_LEVEl_BO:
+		if (nx > 0)
+		{
+			if (bani == HERO_ANI_BO_RIGHT1)
+			{
+				ani = HERO_ANI_BO_RIGHT2;
+				bani = HERO_ANI_BO_RIGHT2;
+			}
+			else
+			{
+				ani = HERO_ANI_BO_RIGHT1;
+				bani = HERO_ANI_BO_RIGHT1;
+			}
+		}
+		else 
+		{
+			if (bani == HERO_ANI_BO_LEFT1)
+			{
+				ani = HERO_ANI_BO_LEFT2;
+				bani = HERO_ANI_BO_LEFT2;
+			}
+			else
+			{
+				ani = HERO_ANI_BO_LEFT1;
+				bani = HERO_ANI_BO_LEFT1;
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
+	/*if (state == HERO_STATE_ONLYMANDIE)
 		ani = HERO_ANI_ONLYMANDIE;
 	else
 	{
-		if (state == HERO_STATE_DOWN)
+		if(level==HERO_LEVEL_DICAUTHANG)
 		{
- 			ani = HERO_ANI_DOWN;
+			if(bani== HERO_ANI_DOWN1)			
+			ani = HERO_ANI_DOWN2;
+			else
+				ani = HERO_ANI_DOWN1;
 		}
 		else
 			if (level == HERO_LEVEL_ONLYMAN)
@@ -183,7 +288,7 @@ void CHERO::Render()
 					ani = HERO_ANI_INCAR_WALKING_RIGHT;
 				else ani = HERO_ANI_INCAR_WALKING_LEFT;
 			}
-	}
+	}*/
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 
@@ -205,9 +310,6 @@ void CHERO::SetState(int state)
 
 	switch (state)
 	{
-	case HERO_STATE_DOWN:
-		vy = 0;
-		break;
 	case HERO_STATE_WALKING_RIGHT:
 		vx = HERO_WALKING_SPEED;
 		nx = 1;
@@ -226,7 +328,6 @@ void CHERO::SetState(int state)
 		break;
 	case HERO_STATE_ONLYMANDIE:
 		vy = 0;
-		//vy = -HERO_ONLYMANDIE_DEFLECT_SPEED;
 		break;
 	
 	}
@@ -237,16 +338,30 @@ void CHERO::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 	left = x;
 	top = y; 
 
-	if (level==HERO_LEVEL_ONLYMAN)
+	switch (level)
 	{
+	case HERO_LEVEL_ONLYMAN:
+
 		right = x + HERO_ONLYMAN_BBOX_WIDTH;
 		bottom = y + HERO_ONLYMAN_BBOX_HEIGHT;
-	}
-	else
-	{
+		break;
+	case HERO_LEVEL_INCAR:
+
 		right = x + HERO_INCAR_BBOX_WIDTH;
 		bottom = y + HERO_INCAR_BBOX_HEIGHT;
+		break;
+	case HERO_LEVEL_DICAUTHANG:
+
+		right = x + HERO_ONLYMAN_BBOX_WIDTH;
+		bottom = y + HERO_ONLYMAN_BBOX_HEIGHT;
+		break;
+	case HERO_LEVEl_BO:
+
+		right = x + HERO_BO_BBOX_WIDTH;
+		bottom = y + HERO_BO_BBOX_HEIGHT;
+		break;
 	}
+	
 }
 
 /*
@@ -255,7 +370,7 @@ void CHERO::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 void CHERO::Reset()
 {
 	SetState(HERO_STATE_IDLE);
-	SetLevel(HERO_LEVEL_ONLYMAN);
+	SetLevel(HERO_LEVEL_INCAR);
 	SetPosition(start_x, start_y);
 	SetSpeed(0, 0);
 	this->hp = 100;
@@ -268,13 +383,14 @@ void CHERO::Changelevel()
 	case 1:
 
 		SetLevel(HERO_LEVEL_ONLYMAN);
+		SetPosition(this->x + 6, this->y );
 
 		break;
 
 	case 2:
 		
 		SetLevel(HERO_LEVEL_INCAR);
-		SetPosition(this->x, this->y - 3);
+		SetPosition(this->x-4, this->y-3);
 		break;
 	}
 }
