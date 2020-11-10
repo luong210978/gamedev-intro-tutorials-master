@@ -622,8 +622,7 @@
 12	27	87	21
 12	27	88	21
 12	27	89	21
-
-
+12	27	90	21
 
 # --- SCENE PORTAL ----	
 # type	l	t	ani_set_id,r,b		scene_id,scceneplace,lv

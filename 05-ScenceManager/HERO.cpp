@@ -125,15 +125,16 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					CBrick* p = dynamic_cast<CBrick*>(e->obj);
 					CGame* game = CGame::GetInstance();
-#pragma region gach lua					
 					if (p->type == 11)
+					{
 						this->hp -= p->Getlosehp(p->type);
-					if (this->hp < 0)
-						this->SetState(HERO_STATE_ONLYMANDIE);
-#pragma endregion
+						if (this->hp < 0)
+							this->SetState(HERO_STATE_ONLYMANDIE);
+					}
 #pragma region di cau thang
 					if (p->type == 12)
 					{
+						x = x + dx;
 						if (level == HERO_LEVEL_ONLYMAN)
 						{
 							SetLevel(HERO_LEVEL_DICAUTHANG);
@@ -142,7 +143,7 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						{
 							if ((game->IsKeyDown(DIK_DOWN)))
 							{
-								this->SetPosition(p->x + 3, p->y);
+								this->SetPosition(p->x + 3, p->y-3);
 								if (bani == HERO_ANI_DOWN1)
 									bani = HERO_ANI_DOWN2;
 								else bani = HERO_ANI_DOWN1;
