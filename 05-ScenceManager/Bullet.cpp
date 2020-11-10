@@ -6,19 +6,53 @@ void CBullet::GetBoundingBox(float& left, float& top, float& right, float& botto
 {
 	left = x;
 	top = y;
-	right = x + BULLET_BBOX_WIDTH;	
-	bottom = y + BULLET_BBOX_HEIGHT;
+	if (aniid == 22)
+	{
+		right = x + BULLET_BBOX_WIDTH;
+		bottom = y + BULLET_BBOX_HEIGHT;
+	}
+	if (aniid == 23)
+	{
+		right = x + BULLET_BBOX_WIDTH/2;
+		bottom = y + BULLET_BBOX_HEIGHT/2;
+	}
+	if (aniid == 24)
+	{
+		right = x + 22;
+		bottom = y + 6;
+	}
+	if (aniid==25)
+	{
+		right = x + 6;
+		bottom = y + 22;
+	}
 }
-CBullet::CBullet(float l, float t, int k) {
+CBullet::CBullet(float l, float t, int k,int aniid) {
 	this->x = l; this->y = t; this -> nx = k;
 	startPositionX = x;
 	startPositionY = y;
+	this->aniid = aniid;
 };
 
 void CBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CGameObject::Update(dt);
-	if (nx < 0) {
+	if(aniid==25)
+	{
+		SetSpeed(0.0f, - BULLET_SPEED );
+		if (y < startPositionY - BULLET_FLYING_SPACE)
+		{
+			x = NULL;
+			y = NULL;
+			return;
+		}
+		else {
+			x += dx;
+			y += dy;
+		}
+	}
+	else
+	if (nx == -1) {
 		SetSpeed(-BULLET_SPEED, 0.0f);
 		if (x < startPositionX - BULLET_FLYING_SPACE)
 		{
@@ -32,7 +66,9 @@ void CBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		}
 
 	}
-	else {
+	else 
+	if (nx == 1)
+	{
 		SetSpeed(BULLET_SPEED, 0.0f);
 		if (x > startPositionX + BULLET_FLYING_SPACE) {
 			x = NULL;
@@ -94,15 +130,16 @@ void CBullet::Render()
 {
 	int ani=1;
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-	LPANIMATION_SET ani_set = animation_sets->Get(22);
+	LPANIMATION_SET ani_set = animation_sets->Get(aniid);
 	this->SetAnimationSet(ani_set);
-	if (nx == -1) {
+	if (nx == -1) 
+	{
 		ani = BULLET_STATE_FLYING_LEFT;
-		animation_set->at(ani)->Render(x, y);
+		animation_set->at(ani)->Render(x, y,255);
 	}
 	else
 	{
-		ani = BULLET_STATE_FLYING_LEFT;
+		ani = BULLET_STATE_FLYING_RIGHT;
 		animation_set->at(ani)->Render(x, y);
 	}
 }

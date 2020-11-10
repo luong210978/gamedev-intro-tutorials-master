@@ -276,6 +276,7 @@ void CPlayScene::Load(int crp,int lv)
 
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 	player->SetLevel(current_level);
+	player->hp = 100;
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -314,21 +315,65 @@ void CPlayScene::Render()
 	map->Render(round(cx),round(cy));
 	if (player->car->visible == true)
 		objects[0]->Render();
-	if (player->isban ==true)
-		if (player->nx == -1)
+	if (player->isban == true)
+	{
+		if (player->GetLevel() == HERO_LEVEL_ONLYMAN)
 		{
-			player->isban = false;
-			obj = new CBullet(cx- BULLET_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, -1);
-			objects.push_back(obj);
+			if (player->nx == -1)
+			{
+				player->isban = false;
+				obj = new CBullet(cx - BULLET_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, -1, 22);
+				objects.push_back(obj);
+			}
+			else
+			{
+				player->isban = false;
+				CGameObject* obj = NULL;
+				obj = new CBullet(cx + HERO_ONLYMAN_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, 1, 22);
+				objects.push_back(obj);
+			}
 		}
-		else
+		if (player->GetLevel() == HERO_LEVEl_BO)
 		{
-			player->isban = false;
-			CGameObject* obj = NULL;
-			obj = new CBullet(cx + HERO_ONLYMAN_BBOX_WIDTH, cy + HERO_ONLYMAN_BBOX_HEIGHT / 4, 1);
-			objects.push_back(obj);
+			if (player->nx == -1)
+			{
+				player->isban = false;
+				obj = new CBullet(cx - BULLET_BBOX_WIDTH/2, cy + HERO_BO_BBOX_HEIGHT / 2, -1, 23);
+				objects.push_back(obj);
+			}
+			else
+			{
+				player->isban = false;
+				CGameObject* obj = NULL;
+				obj = new CBullet(cx + HERO_BO_BBOX_WIDTH, cy + HERO_BO_BBOX_HEIGHT / 2, 1, 23);
+				objects.push_back(obj);
+			}
+		}
+		if (player->GetLevel() == HERO_LEVEL_INCAR)
+		{
+			if(player->state>= 600)
+			{
+				player->isban = false;
+				obj = new CBullet(cx + 10, cy -6, 1, 25);
+				objects.push_back(obj);
+			}
+			else
+			if (player->nx == -1)
+			{
+				player->isban = false;
+				obj = new CBullet(cx - 22, cy + HERO_INCAR_BBOX_HEIGHT / 5, -1, 24);
+				objects.push_back(obj);
+			}
+			else
+			{
+				player->isban = false;
+				CGameObject* obj = NULL;
+				obj = new CBullet(cx + HERO_INCAR_BBOX_WIDTH, cy + HERO_INCAR_BBOX_HEIGHT / 5, 1, 24);
+				objects.push_back(obj);
+			}
+		}
 		
-		}
+	}
 	for (int i = 1; i < objects.size(); i++)
 		if (objects[i]->x > NULL+20)
 			objects[i]->Render();
@@ -355,15 +400,20 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	
 	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
 	if (KeyCode == DIK_C)
-		if (HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
+		//if (HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
 			HERO->isban = true;
 	switch (KeyCode)
 	{
 	case DIK_SPACE:
 		if (HERO->getjump())
-			HERO->SetState(HERO_STATE_JUMP);
+			if(HERO->state==HERO_STATE_UP)
+			HERO->SetState(HERO_STATE_JUMP_UP);
+			else 			HERO->SetState(HERO_STATE_JUMP);
+
+			
 		HERO->setjump(0);
 		break;
+	
 	case DIK_A:
 		HERO->Reset();
 		break;
@@ -395,14 +445,57 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
-
+	
 	// disable control key when HERO ONLYMANDIE 
 	if (HERO->GetState() == HERO_STATE_ONLYMANDIE) 
 		return;
+	
 	if (game->IsKeyDown(DIK_RIGHT))
+	{
+		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+			if (game->IsKeyDown(DIK_UP))
+			{
+				if (HERO->state == HERO_STATE_WALKING_RIGHT)
+					HERO->SetPosition(HERO->x, HERO->y - 16);
+				HERO->SetState(HERO_STATE_UP_WALKING_RIGHT);
+				return;
+			}			
 		HERO->SetState(HERO_STATE_WALKING_RIGHT);
+		if (HERO->bani == HERO_ANI_BO_RIGHT1)
+			HERO->bani = HERO_ANI_BO_RIGHT2;
+			else 
+			HERO->bani = HERO_ANI_BO_RIGHT1;
+		
+	}	
 	else if (game->IsKeyDown(DIK_LEFT))
+	{
+		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+			if (game->IsKeyDown(DIK_UP))
+			{
+				if (HERO->state == HERO_STATE_WALKING_LEFT)
+					HERO->SetPosition(HERO->x, HERO->y - 16);
+				HERO->SetState(HERO_STATE_UP_WALKING_LEFT);	
+				return;
+			}			
 		HERO->SetState(HERO_STATE_WALKING_LEFT);
+		if (HERO->bani == HERO_ANI_BO_LEFT1)
+			HERO->bani = HERO_ANI_BO_LEFT2;
+			else 
+			HERO->bani = HERO_ANI_BO_LEFT1;
+	
+		//HERO->setjump(0);
+	}
+	else if (game->IsKeyDown(DIK_UP))
+	{
+		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+		{
+			if (HERO->state == HERO_STATE_IDLE)
+				HERO->SetPosition(HERO->x, HERO->y - 16);
+			HERO->SetState(HERO_STATE_UP);
+		}
+	}
 	else
+	{
 		HERO->SetState(HERO_STATE_IDLE);
+	}
 }

@@ -15,7 +15,13 @@
 #define HERO_STATE_WALKING_LEFT	200
 #define HERO_STATE_JUMP	300
 #define HERO_STATE_ONLYMANDIE	400
+
 #define HERO_STATE_DOWN	500
+#define HERO_STATE_JUMP_UP	600
+#define HERO_STATE_UP 700
+#define HERO_STATE_UP_WALKING_RIGHT 800
+#define HERO_STATE_UP_WALKING_LEFT	900
+
 
 #define HERO_ANI_ONLYMAN_IDLE_RIGHT	0
 #define HERO_ANI_ONLYMAN_IDLE_LEFT		1
@@ -38,6 +44,12 @@
 #define HERO_ANI_BO_RIGHT1	13
 #define HERO_ANI_BO_RIGHT2	14
 
+#define HERO_ANI_INCAR_JUMP_LEFT 15
+#define HERO_ANI_INCAR_JUMP_RIGHT 16
+
+#define HERO_ANI_INCAR_UP_LEFT 17
+#define HERO_ANI_INCAR_UP_RIGHT 18
+
 #define	HERO_LEVEL_INCAR	1
 #define	HERO_LEVEL_ONLYMAN	2
 #define	HERO_LEVEL_DICAUTHANG	3
@@ -54,22 +66,29 @@
 
 #define HERO_UNTOUCHABLE_TIME 5000
 
-#define HERO_HP = 100;
+#define HERO_HP = 100
+#define HERO_ANIID_BULLET_ONLYMAN 22
+#define HERO_ANIID_BULLET_ONLYMAN_NAM	23
+#define HERO_ANIID_BULLET_INCAR 24
+
 class CHERO : public CGameObject
 {
 	bool isjump;
 	//bool isban;
 	int level;
-	float hp;
-	int ani = -1;
-	int bani = -1;
+	
+	
 	int untouchable;
 	DWORD untouchable_start;
 
 	float start_x;			// initial position of HERO at scene
 	float start_y; 
 public: 
+	int bani = -1;
+	int ani = -1;
+	float crw, crh;
 	Ccar* car;
+	float hp;
 	bool getinto=false;
 	CHERO(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *colliable_objects = NULL);
