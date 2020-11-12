@@ -58,9 +58,9 @@ void Map::Render(int x,int y)
 		}
 	}*/
 	if (x - 16 < 0)
-		x = 16;
+		x = 17;
 	if (y - 16 < 0)
-		y = 16;
+		y = 17;
 	
 		for (int iRow = y - 16; iRow < y + 16; iRow++)
 		{

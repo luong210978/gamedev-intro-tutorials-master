@@ -1,5 +1,6 @@
 #include "car.h"
 #include "Goomba.h"
+
 #define MAX_FRAME_RATE 120
 
 void Ccar::GetBoundingBox(float& left, float& top, float& right, float& bottom)
@@ -7,7 +8,7 @@ void Ccar::GetBoundingBox(float& left, float& top, float& right, float& bottom)
 	left = x;
 	top = y;
 	right = x + CAR_BBOX_WIDTH;
-	bottom = y + CAR_BBOX_HEIGHT;
+	bottom = y + CAR_BBOX_HEIGHT+9;
 }
 Ccar::Ccar(float l, float t, int k) {
 	this->x = l; this->y = t; this->nx = k;
@@ -18,7 +19,7 @@ Ccar::Ccar(float l, float t, int k) {
 void Ccar::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CGameObject::Update(dt);
-	SetSpeed(0.0f,CAR_SPEED);	
+	
 	x += dx;
 	y += dy;
 	vector<LPCOLLISIONEVENT> coEvents;
@@ -26,10 +27,10 @@ void Ccar::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CalcPotentialCollisions(coObjects, coEvents);
 	if (coEvents.size() == 0)
 	{
-		x += dx;
-		y += dy;
+		//vy = 0.0002f;
 		this->SetSpeed(0.0f, 0.0f);
-
+		x += dx;
+		y += dy;		
 	}
 	else
 	{
@@ -70,13 +71,13 @@ void Ccar::Render()
 	LPANIMATION_SET ani_set = animation_sets->Get(1);
 	this->SetAnimationSet(ani_set);
 	if (nx == -1) {
-		ani = ani = CAR_STATE_FLYING_RIGHT;
+		ani = ani = HERO_ANI_INCAR_OUT_LEFT;
 		
 		animation_set->at(ani)->Render(x, y);
 	}
 	else
 	{
-		ani = CAR_STATE_FLYING_LEFT;
+		ani = HERO_ANI_INCAR_OUT_RIGHT;
 		animation_set->at(ani)->Render(x, y);
 	}
 }

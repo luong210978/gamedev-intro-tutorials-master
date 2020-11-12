@@ -2,9 +2,11 @@
 #pragma once
 #include "GameObject.h"
 #define CAR_SPEED 0.1f
+#define HERO_ANI_INCAR_OUT_LEFT				19
+#define HERO_ANI_INCAR_OUT_RIGHT			20
 
 #define CAR_BBOX_WIDTH 26
-#define CAR_BBOX_HEIGHT 8
+#define CAR_BBOX_HEIGHT 26
 
 #define CAR_FLYING_SPACE 200
 

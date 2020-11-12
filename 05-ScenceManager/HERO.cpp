@@ -10,7 +10,7 @@
 #include "car.h"
 CHERO::CHERO(float x, float y) : CGameObject()
 {
-	level = HERO_LEVEL_ONLYMAN;
+	level = HERO_LEVEL_INCAR;
 	untouchable = 0;
 	SetState(HERO_STATE_IDLE);
 	isjump = false;
@@ -30,26 +30,106 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += HERO_GRAVITY * dt;
 	float x1, y1;
 	car->GetPosition(x1, y1);
+	if (vx != 0)
+	{
+		if (GetTickCount() - tgquaybanhxe >= Thoi_gian_chuyen)
+		{
+			quaybanhxe += 1;
+			if (isup)
+			{
+				if (nx == 1)
+					if ((state != HERO_STATE_UP_HALF_WALKING_RIGHT) && (state != HERO_STATE_UP_WALKING_RIGHT))
+					{
+						SetState( HERO_STATE_UP_HALF_WALKING_RIGHT);
+						SetPosition(x, y - 14);
+					}
+					else
+						if ((state != HERO_STATE_UP_WALKING_RIGHT) && (state==HERO_STATE_UP_HALF_WALKING_RIGHT))
+						{
+							SetPosition(x, y - 5);
+							SetState( HERO_STATE_UP_WALKING_RIGHT);
+						}
+				if (nx == -1)
+					if ((state != HERO_STATE_UP_HALF_WALKING_LEFT) && (state != HERO_STATE_UP_WALKING_LEFT))
+					{
+						SetState( HERO_STATE_UP_HALF_WALKING_LEFT);
+						SetPosition(x, y - 14);
+					}
+					else
+						if ((state != HERO_STATE_UP_WALKING_LEFT) && (state== HERO_STATE_UP_HALF_WALKING_LEFT))
+						{
+							SetPosition(x, y - 5);
+							SetState( HERO_STATE_UP_WALKING_LEFT);
+						}
+				
+			}
+			if (!isup)
+			{
+				if (nx == 1)
+					if (state== HERO_STATE_UP_WALKING_RIGHT)
+					{
+						SetState( HERO_STATE_UP_HALF_WALKING_RIGHT);
+						SetPosition(x, y + 3);
+
+					}
+					else
+						if (state= HERO_STATE_UP_HALF_WALKING_RIGHT)
+						{
+							SetState(HERO_STATE_WALKING_RIGHT);
+						}
+				if (nx == -1)
+					if  (state== HERO_STATE_UP_WALKING_LEFT)
+					{
+						SetState( HERO_STATE_UP_HALF_WALKING_LEFT);
+						SetPosition(x, y + 3);
+
+					}
+					else
+						if( state== HERO_STATE_UP_HALF_WALKING_LEFT)
+						{
+							SetState( HERO_STATE_WALKING_LEFT);
+						}
+				
+			}
+			quaybanhxe = quaybanhxe % 4;
+			tgquaybanhxe = GetTickCount();
+		}
+	}
+	if (vx == 0)
+		if (isup)
+		{
+			if (GetTickCount() - tgbdchuyen >= Thoi_gian_chuyen)
+				if (state == HERO_STATE_IDLE)
+				{
+					SetState(HERO_STATE_UP_HALF);
+					SetPosition(x, y - 14);
+
+					tgbdchuyen = GetTickCount();
+				}
+			else
+				if(state== HERO_STATE_UP_HALF)
+			{
+				SetState(HERO_STATE_UP);
+				SetPosition(x, y - 5);
+			}
+		}
+		
 	if ((x > CAR_BBOX_WIDTH + x1) || (y > CAR_BBOX_HEIGHT + y1) || (x < x1)||(y< y1))
 		getinto = false;
 	else
 		getinto = true;
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
-
 	coEvents.clear();
-
 	// turn off collision when ONLYMANDIE 
-	if (state!=HERO_STATE_ONLYMANDIE)
-		CalcPotentialCollisions(coObjects, coEvents);
+	//if (state!=HERO_STATE_ONLYMANDIE)
+	CalcPotentialCollisions(coObjects, coEvents);
 
-	// reset untouchable timer if untouchable time has passed
 	if ( GetTickCount() - untouchable_start > HERO_UNTOUCHABLE_TIME) 
 	{
 		untouchable_start = 0;
 		untouchable = 0;
 	}
-
 	// No collision occured, proceed normally
 	if (coEvents.size()==0)
 	{
@@ -144,16 +224,16 @@ void CHERO::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 							if ((game->IsKeyDown(DIK_DOWN)))
 							{
 								this->SetPosition(p->x + 3, p->y-3);
-								if (bani == HERO_ANI_DOWN1)
-									bani = HERO_ANI_DOWN2;
-								else bani = HERO_ANI_DOWN1;
+								if (bani == HERO_ANI_ONLYMAN_DOWN1)
+									bani = HERO_ANI_ONLYMAN_DOWN2;
+								else bani = HERO_ANI_ONLYMAN_DOWN1;
 
 							}
 							if ((game->IsKeyDown(DIK_UP)))
 							{
-								if (bani == HERO_ANI_DOWN1)
-									bani = HERO_ANI_DOWN2;
-								else bani = HERO_ANI_DOWN1;
+								if (bani == HERO_ANI_ONLYMAN_DOWN1)
+									bani = HERO_ANI_ONLYMAN_DOWN2;
+								else bani = HERO_ANI_ONLYMAN_DOWN1;
 								this->SetPosition(p->x + 3, p->y - 33);
 							}
 						}
@@ -191,91 +271,71 @@ void CHERO::Render()
 {
 	ani = -1;
 	CGame* game = CGame::GetInstance();
-	if (state == HERO_STATE_ONLYMANDIE)
+	if (state== HERO_STATE_ONLYMANDIE)
 	{
-		ani = HERO_ANI_ONLYMANDIE;
+		ani = HERO_ANI_ONLYMAN_DIE;
 		return;
 	}
 	switch (level)
 	{
 	
 	case HERO_LEVEL_DICAUTHANG:
-		if (bani == HERO_ANI_DOWN1)
-			ani = HERO_ANI_DOWN2;	
+		if (bani == HERO_ANI_ONLYMAN_DOWN1)
+			ani = HERO_ANI_ONLYMAN_DOWN2;
 		else
-			ani = HERO_ANI_DOWN1;
+			ani = HERO_ANI_ONLYMAN_DOWN1;
 		break;
 	case HERO_LEVEL_ONLYMAN:
 		if (vx == 0)
 		{
-			if (nx > 0) ani = HERO_ANI_ONLYMAN_IDLE_RIGHT;
-			else ani = HERO_ANI_ONLYMAN_IDLE_LEFT;
+			if (nx > 0) ani = HERO_ANI_ONLYMAN_IDLE_LEFT;
+			else ani = HERO_ANI_ONLYMAN_IDLE_RIGHT;
 		}
 		else if (vx > 0)
-			ani = HERO_ANI_ONLYMAN_WALKING_RIGHT;
-		else ani = HERO_ANI_ONLYMAN_WALKING_LEFT;
+			ani = HERO_ANI_ONLYMAN_WALKING_LEFT;
+		else ani = HERO_ANI_ONLYMAN_WALKING_RIGHT;
 		break;
 	case HERO_LEVEL_INCAR:
-		switch (state)
-		{
-		case HERO_STATE_UP:
+		 if(state>= HERO_STATE_JUMP_UP&& state<= HERO_STATE_UP_WALKING_LEFT)
 			if (nx > 0)
-				ani = HERO_ANI_INCAR_UP_RIGHT;
-			else ani = HERO_ANI_INCAR_UP_LEFT;
-			break;
-		case HERO_STATE_UP_WALKING_RIGHT:
-				ani = HERO_ANI_INCAR_UP_RIGHT;
-			break;
-		case HERO_STATE_UP_WALKING_LEFT:
-			ani = HERO_ANI_INCAR_UP_LEFT;
-			break;
-		case HERO_STATE_JUMP:
-			if (nx > 0)
-				ani = HERO_ANI_INCAR_JUMP_RIGHT;
-			else ani = HERO_ANI_INCAR_JUMP_LEFT;
-				break;
-		/*case HERO_STATE_IDLE:
-			break;*/
-		case HERO_STATE_JUMP_UP:
-			if (nx > 0)
-				ani = HERO_ANI_INCAR_UP_RIGHT;
-			else ani = HERO_ANI_INCAR_UP_LEFT;
-			break;
-		case HERO_STATE_WALKING_LEFT:
-			ani = HERO_ANI_INCAR_WALKING_LEFT;
-			break;
-		case HERO_STATE_WALKING_RIGHT:
-			ani = HERO_ANI_INCAR_WALKING_RIGHT;
-			break;
-		default:
-			if (nx > 0) ani = HERO_ANI_INCAR_IDLE_RIGHT;
-			else ani = HERO_ANI_INCAR_IDLE_LEFT;
-			break;
-		}
+				ani = xe_right_up[quaybanhxe ];
+			else ani = xe_left_up[quaybanhxe % 4];
+
+		 if (state >= HERO_STATE_IDLE && state <= HERO_STATE_JUMP)
+			 if (nx > 0)
+				 ani = xe_right[quaybanhxe ];
+			 else ani = xe_left[quaybanhxe ];
+
+		 if (state >= HERO_STATE_UP_HALF && state <= HERO_SATE_JUMP_UP_HALF)
+			 if (nx > 0)
+				 ani = xe_right_up_half[quaybanhxe];
+			 else ani = xe_left_up_half[quaybanhxe];
 		break;
 	case HERO_LEVEl_BO:
 		if (nx > 0)
 		{
-			if (bani == HERO_ANI_BO_RIGHT1)			
-				ani = HERO_ANI_BO_RIGHT2;							
+			if (bani == HERO_ANI_ONLYMAN_BO_RIGHT1)
+				ani = HERO_ANI_ONLYMAN_BO_RIGHT2;
 			else	
-				ani = HERO_ANI_BO_RIGHT1;
+				ani = HERO_ANI_ONLYMAN_BO_RIGHT1;
 		}
 		else 
 		{
-			if (bani == HERO_ANI_BO_LEFT1)
-				ani = HERO_ANI_BO_LEFT2;				
+			if (bani == HERO_ANI_ONLYMAN_BO_LEFT1)
+				ani = HERO_ANI_ONLYMAN_BO_LEFT2;
 			else
-				ani = HERO_ANI_BO_LEFT1;
+				ani = HERO_ANI_ONLYMAN_BO_LEFT1;
 		}
 		break;
 	default:
 		break;
 	}
-	int alpha = 255;
-	if (untouchable) alpha = 128;
-	animation_set->at(ani)->Render(x, y, alpha);
-	RenderBoundingBox();
+		int alpha = 255;
+		if (untouchable) alpha = 128;
+		animation_set->at(ani)->Render(x, y, alpha);
+		
+		RenderBoundingBox();
+
 }
 bool CHERO::getjump()
 {
@@ -291,6 +351,15 @@ void CHERO::SetState(int state)
 
 	switch (state)
 	{
+	case HERO_STATE_IDLE:
+		vx = 0;
+		break;
+	case HERO_STATE_UP_HALF:
+		vx = 0;
+		break;
+	case HERO_STATE_UP:
+		vx = 0;
+		break;
 	case HERO_STATE_WALKING_RIGHT:
 		vx = HERO_WALKING_SPEED;
 		nx = 1;
@@ -299,7 +368,15 @@ void CHERO::SetState(int state)
 		vx = HERO_WALKING_SPEED;
 		nx = 1;
 		break;
+	case HERO_STATE_UP_HALF_WALKING_RIGHT:
+		vx = HERO_WALKING_SPEED;
+		nx = 1;
+		break;
 	case HERO_STATE_WALKING_LEFT: 
+		vx = -HERO_WALKING_SPEED;
+		nx = -1;
+		break;
+	case HERO_STATE_UP_HALF_WALKING_LEFT:
 		vx = -HERO_WALKING_SPEED;
 		nx = -1;
 		break;
@@ -311,21 +388,17 @@ void CHERO::SetState(int state)
 		// TODO: need to check if HERO is *current* on a platform before allowing to jump again
 		vy = -HERO_JUMP_SPEED_Y;
 		break; 
-	case HERO_STATE_JUMP_UP:
+	case HERO_SATE_JUMP_UP_HALF:
 		vy = -HERO_JUMP_SPEED_Y;
 		break;
-	case HERO_STATE_IDLE: 
-		vx = 0;	
-		break;
-	case HERO_STATE_UP:
-		vx = 0;
+	case HERO_STATE_JUMP_UP:
+		vy = -HERO_JUMP_SPEED_Y;
 		break;
 	case HERO_STATE_ONLYMANDIE:
 		vy = 0;
 		break;
-
-	
 	}
+	//DebugOut(L"[INFO] state: %d\n", state);
 }
 
 void CHERO::GetBoundingBox(float &left, float &top, float &right, float &bottom)
@@ -341,29 +414,22 @@ void CHERO::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 		bottom = y + HERO_ONLYMAN_BBOX_HEIGHT;
 		break;
 	case HERO_LEVEL_INCAR:
-		switch (state)
+		if (state >= HERO_STATE_JUMP_UP && state <= HERO_STATE_UP_WALKING_LEFT)
 		{
-		default:right = x + HERO_INCAR_BBOX_WIDTH;
-			bottom = y + HERO_INCAR_BBOX_HEIGHT;
-			break;
-		
-		case HERO_STATE_UP:
 			right = x + 26;
 			bottom = y + 34;
-			break;
-		case HERO_STATE_JUMP_UP:
-			right = x + 26;
-			bottom = y + 34;
-			break;
-		case HERO_STATE_UP_WALKING_RIGHT:
-			right = x + 26;
-			bottom = y + 34;
-			break;
-		case HERO_STATE_UP_WALKING_LEFT:
-			right = x + 26;
-			bottom = y + 34;
-			break;
 		}
+		if (state >= HERO_STATE_UP_HALF && state <= HERO_SATE_JUMP_UP_HALF)
+		{
+			right = x + 26;
+			bottom = y + 30;
+		}
+		if (state >= HERO_STATE_IDLE && state <= HERO_STATE_JUMP)
+		{
+			right = x + HERO_INCAR_BBOX_WIDTH;
+			bottom = y + HERO_INCAR_BBOX_HEIGHT;//18
+		}
+		
 		break;
 	case HERO_LEVEL_DICAUTHANG:
 
@@ -405,7 +471,7 @@ void CHERO::Changelevel()
 	case 2:
 		
 		SetLevel(HERO_LEVEL_INCAR);
-		SetPosition(this->x-4, this->y-3);
+		SetPosition(this->car->x, this->car->y+8);
 		break;
 	}
 }

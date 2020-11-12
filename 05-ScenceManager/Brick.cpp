@@ -1,10 +1,12 @@
 #include "Brick.h"
 #include "Sprites.h"
-CBrick::CBrick(float l, float t,int k)
+CBrick::CBrick(float l, float t,int k,int r,int b)
 {
 	x = l;
 	y = t;
 	type = k;
+	this->r = r;
+	this->b = b;
 }
 void CBrick::Render()
 {
@@ -24,6 +26,6 @@ void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)
 {
 	l = x;
 	t = y;
-	r = x + 16;
-	b = y + 16;
+	r = this->r;
+	b = this->b;
 }
