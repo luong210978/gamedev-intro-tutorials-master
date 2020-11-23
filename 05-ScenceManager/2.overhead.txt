@@ -1,0 +1,87 @@
+# id	file_path	transparent_color_r	g	b
+[TEXTURES]
+0	textures\nhanvat.png	255	0	255
+40	map\level2-over_bank.png	255	0	255
+# id	left	top	right	bottom	texture_id
+[SPRITES]
+#########HERO
+#IDLE LEFT 
+101	102	74	126	106	0
+#WALK LEFT
+102	72	75	96	106	0
+103	44	75	68	106	0
+#IDLE Right	
+104	136	74	160	106	0
+#WALK
+105	166	75	190	106	0
+106	194	75	218	106	0
+#IDLE straight 
+107	83	39	103	71	0
+#WALK
+108	109	40	129	71	0
+109	57	40	77	71	0
+#IDEL under
+110	159	39	179	71	0
+#WALK
+111	134	40	154	71	0
+112	183	40	203	71	0
+#-----------------------------------------------#
+#bullet
+#50000	82	38	90	46	50
+#50001	75	40	79	44	50
+#50002	91	21	113	27	50
+#50003	117	20	123	42	50
+#50004	53	90	75	96	50
+
+#-----------------------------------------------#
+#BRICK
+#20001	160	944	192	960	10
+
+# ani_id	sprite1_id	time1	sprite2_id	time2	...
+[ANIMATIONS]
+
+# ==== HERO=========
+1	101	100
+2	102	100	101	100	103	100
+3	104	100
+4	105	100	104	100	106	100
+5	107	100
+6	108	100	109	100
+7	110	100
+8	111	100	112	100
+#bullet
+555	50000	100
+556	50001	100
+557	50002	100
+558	50003	100
+559	50004	100
+# ==== BRICK =========
+601	20001	100
+# id	ani1	ani2	ani3
+[ANIMATION_SETS]
+# MARIO
+1	1	2	3	4	5	6	7	8
+# BRICK 
+21	601
+#Bullet
+22	555	555
+23	556	556
+24	557	559
+25	558	558
+[OBJECTS]
+# type	l	t	ani_set_id	extra_settings per object type
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas 21 ,11
+# MARIO	type x,y,aniset,id
+0	4	120	1	1
+# BRICK 
+# --- platform (hint: I created the list using Excel!) ----
+1	0	124	21	18	128
+1	14	108	21	18	128
+1	0	108	21	14	114
+1	0	108	21	2	142
+ #--- SCENE PORTAL ----	
+# type	l	t	ani_set_id,r,b		scene_id,scceneplace,lv
+#50	5	6	0	6	8	2	1	5
+[MAP]
+#title	cl	row	w	h	total bit
+40	11	6	128	128	58	map\level2-over_map.txt

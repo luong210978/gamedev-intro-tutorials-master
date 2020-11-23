@@ -1,5 +1,6 @@
 #include "Bullet.h"
 #include "Goomba.h"
+#include "Brick.h"
 #define MAX_FRAME_RATE 120
 
 void CBullet::GetBoundingBox(float& left, float& top, float& right, float& bottom)
@@ -31,6 +32,7 @@ CBullet::CBullet(float l, float t, int k,int aniid) {
 	this->x = l; this->y = t; this -> nx = k;
 	startPositionX = x;
 	startPositionY = y;
+	this->del = false;
 	this->aniid = aniid;
 };
 
@@ -42,8 +44,7 @@ void CBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		SetSpeed(0.0f, - BULLET_SPEED );
 		if (y < startPositionY - BULLET_FLYING_SPACE)
 		{
-			x = NULL;
-			y = NULL;
+			del = true;
 			return;
 		}
 		else {
@@ -56,8 +57,7 @@ void CBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		SetSpeed(-BULLET_SPEED, 0.0f);
 		if (x < startPositionX - BULLET_FLYING_SPACE)
 		{
-			x = NULL;
-			y = NULL;
+			del = true;
 			return;			
 		}
 		else {
@@ -71,9 +71,10 @@ void CBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		SetSpeed(BULLET_SPEED, 0.0f);
 		if (x > startPositionX + BULLET_FLYING_SPACE) {
-			x = NULL;
-			y = NULL;
+			
+			del = true; 
 			return;
+			
 		}
 		else
 		{
@@ -95,12 +96,21 @@ CalcPotentialCollisions(coObjects, coEvents);
 		float rdx = 0;
 		float rdy = 0;
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny,rdx,rdy);
-		// block 
-		//x += min_tx * dx + nx * 0.4f;		// nx*0.4f : need to push out a bit to avoid overlapping next frame
-		//y += min_ty * dy + ny * 0.4f;
 		if (nx != 0) vx = 0;
 		if (ny != 0) vy = 0;
-
+		del = true;
+		for (UINT i = 0; i < coEvents.size(); i++)
+		{
+			LPCOLLISIONEVENT e = coEvents[i];
+			if (dynamic_cast<CBrick*>(e->obj)) // if e->obj is Goomba 
+			{
+				CBrick* p = dynamic_cast<CBrick*>(e->obj);
+				if (p->type == 13)
+				{
+					p->del = true;
+				}
+			}
+		}
 		// Collision logic with Goombas
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
@@ -120,9 +130,8 @@ CalcPotentialCollisions(coObjects, coEvents);
 					}
 				}				
 			}
+			
 		}
-		this->x = NULL;
-		this->y = NULL;
 	}
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
 }

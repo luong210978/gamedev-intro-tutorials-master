@@ -29,7 +29,11 @@
 #define HERO_STATE_UP 1100
 #define HERO_STATE_UP_WALKING_RIGHT 1300
 #define HERO_STATE_UP_WALKING_LEFT	1400
-
+////////////////////////////////////////////////////
+#define HERO_STATE_GO_STRAIGHT	1500
+#define HERO_STATE_GO_LEFT		1600
+#define HERO_STATE_GO_RIGHT		1700
+#define HERO_STATE_GO_UNDER		1800
 ////////////////////////////////////////
 //==========ANI==============================
 #define HERO_ANI_ONLYMAN_IDLE_LEFT			0
@@ -79,10 +83,20 @@
 #define HERO_ANI_INCAR_UP_RIGHT3			35
 #define HERO_ANI_INCAR_UP_RIGHT4			36
 //////////////////////////////////////////////
+#define HERO_ANI_OVH_IDLE_LEFT			0
+#define HERO_ANI_OVH_WALKING_LEFT		1
+#define HERO_ANI_OVH_IDLE_RIGHT			2
+#define HERO_ANI_OVH_WALKING_RIGHT		3
+#define HERO_ANI_OVH_IDLE_STRAIGHT		4
+#define HERO_ANI_OVH_WALKING_STRAIGHT	5
+#define	HERO_ANI_OVH_IDLE_UNDER			6
+#define HERO_ANI_OVH_WALKING_UNDER		7
+/////////////////////////////////////////////
 #define	HERO_LEVEL_INCAR	1
 #define	HERO_LEVEL_ONLYMAN	2
 #define	HERO_LEVEL_DICAUTHANG	3
-#define HERO_LEVEl_BO	4
+#define HERO_LEVEL_BO	4
+#define HERO_LEVEL_OVH 5
 //==============level=====================
 #define HERO_ONLYMAN_BBOX_WIDTH  8
 #define HERO_ONLYMAN_BBOX_HEIGHT 16
@@ -92,6 +106,9 @@
 /////////////////////////////////////////
 #define HERO_BO_BBOX_WIDTH	16
 #define HERO_BO_BBOX_HEIGHT 8
+/////////////////////////////////////////
+#define HERO_OVH_BBOX_WIDTH	20
+#define HERO_OVH_BBOX_HEIGHT 31
 /////////////////////////////////////////
 #define HERO_UNTOUCHABLE_TIME 3000
 //////////////////////////////////////
@@ -110,6 +127,7 @@ class CHERO : public CGameObject
 	DWORD untouchable_start;
 	float start_x;			// initial position of HERO at scene
 	float start_y;
+	int start_level;
 public:
 	int bani = -1;
 	int quaybanhxe = 1;
@@ -124,6 +142,8 @@ public:
 	int xe_right_up_half[4] = { HERO_ANI_INCAR_UP_HALF_RIGHT1 ,HERO_ANI_INCAR_UP_HALF_RIGHT2,HERO_ANI_INCAR_UP_HALF_RIGHT3,HERO_ANI_INCAR_UP_HALF_RIGHT4 };
 	int xe_left_up[4] = { HERO_ANI_INCAR_UP_LEFT1 ,HERO_ANI_INCAR_UP_LEFT2,HERO_ANI_INCAR_UP_LEFT3,HERO_ANI_INCAR_UP_LEFT4 };
 	int xe_right_up[4] = { HERO_ANI_INCAR_UP_RIGHT1 ,HERO_ANI_INCAR_UP_RIGHT2,HERO_ANI_INCAR_UP_RIGHT3,HERO_ANI_INCAR_UP_RIGHT4 };
+	int bo_left[2] = { HERO_ANI_ONLYMAN_BO_LEFT1 ,HERO_ANI_ONLYMAN_BO_LEFT2 };
+	int bo_right[2] = { HERO_ANI_ONLYMAN_BO_RIGHT1,HERO_ANI_ONLYMAN_BO_RIGHT2 };
 	int ani = -1;
 	float crw, crh;
 	Ccar* car;
@@ -136,6 +156,7 @@ public:
 	void setjump(bool isjump);
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
+	void SetLevelstart(int l) { start_level = l; level = l; }
 	int GetLevel()
 	{
 		return level;

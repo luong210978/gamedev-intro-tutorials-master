@@ -3,7 +3,7 @@ start	1	2	1
 #scene list
 [SCENES]
 1	map2.5.txt
-2	scene2.txt
+2	2.overhead.txt
 3	scene-test.txt
 4	scene.txt
 5	scene-Copy.txt

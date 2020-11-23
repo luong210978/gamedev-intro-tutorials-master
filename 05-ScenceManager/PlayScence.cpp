@@ -27,6 +27,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_BRICK	1
 #define OBJECT_TYPE_BRICKFIRE	11
 #define OBJECT_TYPE_thang	12
+#define OBJECT_TYPE_BRICK_OUT 13
 #define OBJECT_TYPE_BULLET	100
 
 #define OBJECT_TYPE_GOOMBA	2
@@ -148,9 +149,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		}
 		if (atof(tokens[4].c_str()) == current_place)
 		{
+			
 			obj = new CHERO(x, y);
 			player = (CHERO*)obj;
-			player->car = new Ccar(x,y,1);			
+			player->car = new Ccar(x,y,1);		
+			player->SetLevelstart(current_level);
 			LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 			player->car->SetAnimationSet(ani_set);
 			objects.push_back(player->car);
@@ -182,7 +185,12 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		int b = atof(tokens[5].c_str()) * 16;
 		obj = new CBrick(x, y, object_type, r, b);
 	}
-
+	case OBJECT_TYPE_BRICK_OUT:
+	{
+		int r = atof(tokens[4].c_str()) * 16;
+		int b = atof(tokens[5].c_str()) * 16;
+		obj = new CBrick(x, y, object_type, r, b);
+	}
 	break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas();
 		break;
@@ -276,8 +284,6 @@ void CPlayScene::Load(int crp,int lv)
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
 	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
-	player->SetLevel(current_level);
-	player->hp = 100;
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -316,6 +322,7 @@ void CPlayScene::Render()
 	map->Render(round(cx),round(cy));
 	if (player->car->visible == true)
 		objects[0]->Render();
+	//objects[0]->Render();
 	if (player->isban == true)
 	{
 		if (player->GetLevel() == HERO_LEVEL_ONLYMAN)
@@ -334,7 +341,7 @@ void CPlayScene::Render()
 				objects.push_back(obj);
 			}
 		}
-		if (player->GetLevel() == HERO_LEVEl_BO)
+		if (player->GetLevel() == HERO_LEVEL_BO)
 		{
 			if (player->nx == -1)
 			{
@@ -362,23 +369,27 @@ void CPlayScene::Render()
 			if (player->nx == -1)
 			{
 				player->isban = false;
-				obj = new CBullet(cx - 22, cy + HERO_INCAR_BBOX_HEIGHT / 5, -1, 24);
+				obj = new CBullet(cx /*- 22*/, cy + HERO_INCAR_BBOX_HEIGHT / 5, -1, 24);
 				objects.push_back(obj);
 			}
 			else
 			{
 				player->isban = false;
 				CGameObject* obj = NULL;
-				obj = new CBullet(cx + HERO_INCAR_BBOX_WIDTH, cy + HERO_INCAR_BBOX_HEIGHT / 5, 1, 24);
+				obj = new CBullet(cx + HERO_INCAR_BBOX_WIDTH-22, cy + HERO_INCAR_BBOX_HEIGHT / 5, 1, 24);
 				objects.push_back(obj);
 			}
 		}
 		
 	}
 	for (int i = 1; i < objects.size(); i++)
-		if (objects[i]->x > NULL+20)
+		if ((objects[i]->del ==false))
 			objects[i]->Render();
-		
+		else
+		{
+			objects[i]-> ~CGameObject();
+			objects.erase(objects.begin() + i);
+		}
 	
 }
 
@@ -401,7 +412,6 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	
 	CHERO *HERO = ((CPlayScene*)scence)->GetPlayer();
 	if (KeyCode == DIK_C)
-		//if (HERO->GetLevel() == HERO_LEVEL_ONLYMAN)
 			HERO->isban = true;
 	switch (KeyCode)
 	{
@@ -426,6 +436,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		break;
 	case DIK_X:
 		if (HERO->getjump())
+		if(!HERO->isup)
 		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
 		{
 			HERO->car->visible = true;
@@ -456,87 +467,130 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when HERO ONLYMANDIE 
 	if (HERO->GetState() == HERO_STATE_ONLYMANDIE) 
 		return;
-	if (game->IsKeyDown(DIK_RIGHT))
-	{		
-		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+	if (HERO->GetLevel() != HERO_LEVEL_OVH)
+	{
+		if (game->IsKeyDown(DIK_RIGHT))
 		{
-			if (HERO->state == HERO_STATE_IDLE)
+			if (HERO->GetLevel() == HERO_LEVEL_INCAR)
 			{
-				HERO->quaybanhxe += 1;
-			}
-			
-			if (game->IsKeyDown(DIK_UP))
-			{
-				HERO->isup = true;
-				if (HERO->state < HERO_STATE_UP_HALF)
-					HERO->SetState(HERO_STATE_WALKING_RIGHT);
-				else 
-				if (HERO->state <= HERO_SATE_JUMP_UP_HALF)
-					HERO->SetState(HERO_STATE_UP_HALF_WALKING_RIGHT);
+				if (HERO->state == HERO_STATE_IDLE)
+				{
+					HERO->quaybanhxe += 1;
+				}
+
+				if (game->IsKeyDown(DIK_UP))
+				{
+					HERO->isup = true;
+					if (HERO->state < HERO_STATE_UP_HALF)
+						HERO->SetState(HERO_STATE_WALKING_RIGHT);
+					else
+						if (HERO->state <= HERO_SATE_JUMP_UP_HALF)
+							HERO->SetState(HERO_STATE_UP_HALF_WALKING_RIGHT);
+						else
+							if (HERO->state <= HERO_STATE_UP_WALKING_LEFT)
+								HERO->SetState(HERO_STATE_UP_WALKING_RIGHT);
+					return;
+
+				}
 				else
-					if (HERO->state <= HERO_STATE_UP_WALKING_LEFT)
-						HERO->SetState(HERO_STATE_UP_WALKING_RIGHT);
-				return;
-				
-			} 
+					HERO->isup = false;
+			}
+			if (HERO->state < HERO_STATE_UP_HALF)
+				HERO->SetState(HERO_STATE_WALKING_RIGHT);
+			if (HERO->GetLevel() == HERO_LEVEL_BO)
+				/*if (HERO->state == HERO_STATE_IDLE)
+				{
+					HERO->quaybanhxe += 1;
+				}*/
+				if (HERO->bani == HERO_ANI_ONLYMAN_BO_RIGHT1)
+					HERO->bani = HERO_ANI_ONLYMAN_BO_RIGHT2;
+				else
+					HERO->bani = HERO_ANI_ONLYMAN_BO_RIGHT1;
+			return;
+		}
+		else if (game->IsKeyDown(DIK_LEFT))
+		{
+			if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+			{
+				if (HERO->state == HERO_STATE_IDLE)
+				{
+					HERO->quaybanhxe += 1;
+				}
+				if (game->IsKeyDown(DIK_UP))
+				{
+					HERO->isup = true;
+					if (HERO->state < HERO_STATE_UP_HALF)
+						HERO->SetState(HERO_STATE_WALKING_LEFT);
+					else
+						if (HERO->state <= HERO_SATE_JUMP_UP_HALF)
+							HERO->SetState(HERO_STATE_UP_HALF_WALKING_LEFT);
+						else
+							if (HERO->state <= HERO_STATE_UP_WALKING_LEFT)
+								HERO->SetState(HERO_STATE_UP_WALKING_LEFT);
+					return;
+				}
+				else HERO->isup = false;
+			}
+			if (HERO->state < HERO_STATE_UP_HALF)
+				HERO->SetState(HERO_STATE_WALKING_LEFT);
+
+
+			if (HERO->GetLevel() == HERO_LEVEL_BO)
+				if (HERO->state == HERO_STATE_IDLE)
+					HERO->quaybanhxe += 1;
+			return;
+		}
+		else
+		{
+			if (HERO->state <= HERO_STATE_JUMP)
+				HERO->SetState(HERO_STATE_IDLE);
 			else
-			HERO->isup = false;
+				if ((HERO->state <= HERO_SATE_JUMP_UP_HALF) && (HERO->state >= HERO_STATE_UP_HALF))
+					HERO->SetState(HERO_STATE_UP_HALF);
+				else if ((HERO->state <= HERO_STATE_UP_WALKING_LEFT) && (HERO->state >= HERO_STATE_JUMP_UP))
+					HERO->SetState(HERO_STATE_UP);
 		}
-		if(HERO->state < HERO_STATE_UP_HALF)
-		HERO->SetState(HERO_STATE_WALKING_RIGHT);
-		if(HERO->GetLevel()== HERO_LEVEl_BO)
-		if (HERO->bani == HERO_ANI_ONLYMAN_BO_RIGHT1)
-		HERO->bani = HERO_ANI_ONLYMAN_BO_RIGHT2;
-		else
-		HERO->bani = HERO_ANI_ONLYMAN_BO_RIGHT1;
-		return;
-	}	
-	else if (game->IsKeyDown(DIK_LEFT))
-	{
-		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+		if (game->IsKeyDown(DIK_UP))
 		{
-			if (HERO->state == HERO_STATE_IDLE)
-			{
-				HERO->quaybanhxe += 1;
-			}
-			if (game->IsKeyDown(DIK_UP))
+			if (HERO->GetLevel() == HERO_LEVEL_INCAR)
 			{
 				HERO->isup = true;
-				if (HERO->state < HERO_STATE_UP_HALF)
-					HERO->SetState(HERO_STATE_WALKING_LEFT);
-				else
-				if (HERO->state <= HERO_SATE_JUMP_UP_HALF)
-					HERO->SetState(HERO_STATE_UP_HALF_WALKING_LEFT);
-				else
-					if (HERO->state <= HERO_STATE_UP_WALKING_LEFT)
-						HERO->SetState(HERO_STATE_UP_WALKING_LEFT);
-				return;
 			}
-			else HERO->isup = false;
+			return;
 		}
-		if (HERO->state < HERO_STATE_UP_HALF)
-		HERO->SetState(HERO_STATE_WALKING_LEFT);
-		
-
-		if (HERO->GetLevel() == HERO_LEVEl_BO)
-		if (HERO->bani == HERO_ANI_ONLYMAN_BO_LEFT1)
-		HERO->bani = HERO_ANI_ONLYMAN_BO_LEFT2;
 		else
-		HERO->bani = HERO_ANI_ONLYMAN_BO_LEFT1;
-		return;
-	}
-
-	if (game->IsKeyDown(DIK_UP))
-	{
-		if (HERO->GetLevel() == HERO_LEVEL_INCAR)
-		{		
-			HERO->isup = true;
+		{
+			if (HERO->GetLevel() == HERO_LEVEL_INCAR)
+			{
+				HERO->isup = false;
+			}
+			//HERO->SetState(HERO_STATE_IDLE);
 		}
-		return;
 	}
 	else
 	{
-	HERO->isup = false;	
-	 HERO->SetState(HERO_STATE_IDLE);
+		if (game->IsKeyDown(DIK_RIGHT))
+		{
+			HERO->SetState(HERO_STATE_GO_RIGHT);
+		}
+		else 
+		if (game->IsKeyDown(DIK_LEFT))
+		{
+			HERO->SetState(HERO_STATE_GO_LEFT);
+		}
+		else
+		if (game->IsKeyDown(DIK_UP))
+		{
+			HERO->SetState(HERO_STATE_GO_STRAIGHT);
+		}
+		else
+		if (game->IsKeyDown(DIK_DOWN))
+		{
+			HERO->SetState(HERO_STATE_GO_UNDER);
+		}
+		else
+		{
+			HERO->SetState(HERO_STATE_IDLE);
+		}
 	}
 }

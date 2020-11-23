@@ -56,9 +56,9 @@ public:
 	float vy;
 
 	int nx;	 
-
+	int ny;
 	int state;
-
+	bool del=false;
 	bool visible;
 
 	DWORD dt; 

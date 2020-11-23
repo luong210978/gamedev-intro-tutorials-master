@@ -10,8 +10,8 @@ CBrick::CBrick(float l, float t,int k,int r,int b)
 }
 void CBrick::Render()
 {
-	//animation_set->at(0)->Render(x, y);
-	
+	if (type == 13)
+		animation_set->at(0)->Render(x, y);	
 }
 
 float CBrick::Getlosehp(int type)
